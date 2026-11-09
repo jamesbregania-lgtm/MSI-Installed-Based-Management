@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.*
+!.env.example
+data/local-db-state.json
+
+# Local tooling artifacts — not application source
+.agents/
+graphify-out/
+
+# Old file-based login sessions; sessions now live in memory and the auth cookie
+data/sessions/
+

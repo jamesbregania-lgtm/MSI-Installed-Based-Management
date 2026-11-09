@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin — MSI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin/admin_account.css?v=<%= Date.now() %>">
+    <link rel="stylesheet" href="/css/shared/machine-history.css?v=<%= Date.now() %>">
+    <link rel="stylesheet" href="/css/admin/serial-search.css?v=<%= Date.now() %>">
+</head>
+<body>
+
+<%
+const isSales = currentUser && currentUser.role === 'sales';
+%>
+
+<header class="mobile-admin-header" id="mobileAdminHeader">
+    <button type="button" class="mobile-menu-button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="false" aria-label="Open navigation menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        <span>Menu</span>
+    </button>
+    <span class="mobile-admin-brand">MSI <%= isSales ? 'Sales' : 'Admin' %></span>
+</header>
+<div class="sidebar-backdrop" id="sidebarBackdrop" hidden aria-hidden="true"></div>
+<aside class="sidebar" id="sidebar" aria-label="<%= isSales ? 'Sales' : 'Admin' %> navigation">
+    <div class="sidebar-brand">
+        <div class="brand-icon">
+            <img src="/Image_Logo/MSI%20LOGO%20ORIGINAL%202%20(1)%20copy_edited.avif">
+        </div>
+        <span class="brand-name">MSI <%= isSales ? 'Sales' : 'Admin' %></span>
+        <button type="button" class="sidebar-close" id="sidebarClose" aria-label="Close navigation menu">×</button>
+    </div>
+
+    <nav class="sidebar-nav">
+        <button class="nav-item" data-section="serial-search" onclick="switchSection('serial-search', this)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+            <span>Serial Number Search</span>
+        </button>
+
+        <% if (!isSales) { %>
+            <button class="nav-item active" data-section="employees" onclick="switchSection('employees', this)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                <span>Users</span>
+            </button>
+            <button class="nav-item" data-section="clients" onclick="switchSection('clients', this)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                <span>Clients</span>
+            </button>
+            <button class="nav-item" data-section="unit-models" onclick="switchSection('unit-models', this)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                <span>Units &amp; Models</span>
+            </button>
+            <button class="nav-item" data-section="parts" onclick="switchSection('parts', this)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                <span>Parts</span>
+            </button>
+        <% } %>
+        <button class="nav-item <%= isSales ? 'active' : '' %>" data-section="monitoring" onclick="switchSection('monitoring', this)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6" rx="1"/><rect x="12" y="8" width="3" height="9" rx="1"/><rect x="17" y="5" width="3" height="12" rx="1"/></svg>
+            <span>Monitoring</span>
+        </button>
+        <button class="nav-item" data-section="tech-history" onclick="switchSection('tech-history', this)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 3 3 9 9 9"/><polyline points="12 7 12 12 15 14"/></svg>
+            <span>Tech History</span>
+        </button>
+        <% if (!isSales) { %>
+            <button class="nav-item" data-section="unit-transfer" onclick="switchSection('unit-transfer', this)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                <span>Transfer Unit</span>
+            </button>
+            <button class="nav-item" data-section="scheduling" onclick="switchSection('scheduling', this)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 15 11 17 15 13"/></svg>
+                <span>Scheduling</span>
+            </button>
+        <% } %>
+        <button class="nav-item" data-section="activity-log" onclick="switchSection('activity-log', this)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>
+            <span>Activity Log</span>
+        </button>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="admin-info">
+            <div class="admin-avatar"><%= currentUser.fullName.charAt(0).toUpperCase() %></div>
+            <div class="admin-details">
+                <span class="admin-name"><%= currentUser.fullName %></span>
+                <span class="admin-role">
+                    <%= formatRoleLabel(currentUser.role) %>
+                    <% if (currentUser.department) { %> | <%= currentUser.department %><% } %>
+                </span>
+            </div>
+        </div>
+        <a href="/logout" class="logout-btn" title="Logout">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </a>
+    </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+
+    <!-- FLASH MESSAGES -->
+    <% if (success) { %>
+        <div class="flash flash-success" id="flashMsg">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            <%= success %>
+        </div>
+    <% } %>
+    <% if (error) { %>
+        <div class="flash flash-error" id="flashMsg">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <%= error %>
+        </div>
+    <% } %>
+
+    <!-- ── EMPLOYEES SECTION ── -->
+    <% if (!isSales) { %>
+    <section class="section active" id="section-employees">
+        <div class="section-header">
+            <div>
+                <h1>User Accounts</h1>
+                <p>Invite, update, and manage user accounts.</p>
+            </div>
+            <div class="section-actions">
+                <a class="btn btn-ghost btn-employee-view" href="/user_account" title="Open user interface">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <circle cx="12" cy="8" r="4"/>
+                        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                    </svg>
+                    User View
+                </a>
+                <button class="btn btn-primary" onclick="openModal('modal-invite-employee')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    Invite User
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stat-chip">
+                <span class="stat-num"><%= accounts.length %></span>
+                <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-num"><%= accounts.filter(a => a.status !== 'inactive').length %></span>
+                <span class="stat-label">Active</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-num"><%= accounts.filter(a => a.status === 'inactive').length %></span>
+                <span class="stat-label">Inactive</span>
+            </div>
+        </div>
+
+        <!-- Technician Table Card -->
+        <div class="card" style="margin-bottom: 24px;">
+            <div class="card-toolbar">
+                <div class="search-wrap">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="accountSearch" placeholder="Search technicians…" oninput="filterAccounts()">
+                </div>
+                <div class="filter-tabs">
+                    <button class="filter-tab active" onclick="filterByStatus('all', this)">All</button>
+                    <button class="filter-tab" onclick="filterByStatus('active', this)">Active</button>
+                    <button class="filter-tab" onclick="filterByStatus('inactive', this)">Inactive</button>
+                </div>
+            </div>
+
+            <div class="table-wrap" style="max-height: 350px; overflow-y: auto; overflow-x: auto;">
+                <table style="table-layout: fixed; width: 100%; min-width: 800px;">
+                    <colgroup>
+                        <col style="width: 5%;">
+                        <col style="width: 22%;">
+                        <col style="width: 14%;">
+                        <col style="width: 11%;">
+                        <col style="width: 16%;">
+                        <col style="width: 10%;">
+                        <col style="width: 10%;">
+                        <col style="width: 12%;">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Technician</th>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th>Department</th>
+                            <th>Branch</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accountTableBodyTech">
+                        <% accounts.filter(a => a.role === 'user').forEach((account, index) => { %>
+                        <tr class="emp-row" data-status="<%= account.status === 'inactive' ? 'inactive' : 'active' %>">
+                            <td><%= index + 1 %></td>
+                            <td>
+                                <div class="person-cell">
+                                    <div class="avatar-sm"><%= account.fullName.charAt(0).toUpperCase() %></div>
+                                    <span><%= account.fullName %></span>
+                                </div>
+                            </td>
+                            <td><code class="mono"><%= account.username %></code></td>
+                            <td><%= formatRoleLabel(account.role) %></td>
+                            <td><%= account.department %></td>
+                            <td><%= account.branch %></td>
+                            <td>
+                                <% if (account.status === 'inactive') { %>
+                                    <span class="badge badge-inactive">Inactive</span>
+                                <% } else { %>
+                                    <span class="badge badge-active">Active</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="icon-btn icon-edit" title="Edit"
+                                        onclick="openEditEmployee('<%= account.username %>', '<%= account.fullName %>', '<%= account.department %>', '<%= account.branch %>')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    </button>
+                                    <button class="icon-btn icon-key" title="Reset Password"
+                                        onclick="openResetPass('<%= account.username %>')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    </button>
+                                    <% if (account.status === 'inactive') { %>
+                                    <button class="icon-btn icon-enable" title="Reactivate"
+                                        onclick="toggleEmployee('<%= account.username %>', 'active')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                                    </button>
+                                    <% } else { %>
+                                    <button class="icon-btn icon-disable" title="Deactivate"
+                                        onclick="toggleEmployee('<%= account.username %>', 'inactive')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                                    </button>
+                                    <% } %>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sales Table Card -->
+        <div class="card">
+            <div class="card-toolbar">
+                <div class="search-wrap">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="salesSearch" placeholder="Search sales rep…" oninput="filterSalesAccounts()">
+                </div>
+                <div class="filter-tabs">
+                    <button class="filter-tab active" onclick="filterSalesByStatus('all', this)">All</button>
+                    <button class="filter-tab" onclick="filterSalesByStatus('active', this)">Active</button>
+                    <button class="filter-tab" onclick="filterSalesByStatus('inactive', this)">Inactive</button>
+                </div>
+            </div>
+
+            <div class="table-wrap" style="max-height: 350px; overflow-y: auto; overflow-x: auto;">
+                <table style="table-layout: fixed; width: 100%; min-width: 800px;">
+                    <colgroup>
+                        <col style="width: 5%;">
+                        <col style="width: 19%;">
+                        <col style="width: 13%;">
+                        <col style="width: 9%;">
+                        <col style="width: 12%;">
+                        <col style="width: 10%;">
+                        <col style="width: 10%;">
+                        <col style="width: 10%;">
+                        <col style="width: 12%;">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>SALES</th>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th>Department</th>
+                            <th>Branch</th>
+                            <th>Clients</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accountTableBodySales">
+                        <% accounts.filter(a => a.role === 'sales').forEach((account, index) => {
+                            const assignedCount = clients.filter(c => c.salesUsername === account.username).length;
+                        %>
+                        <tr class="emp-row" data-status="<%= account.status === 'inactive' ? 'inactive' : 'active' %>">
+                            <td><%= index + 1 %></td>
+                            <td>
+                                <div class="person-cell">
+                                    <div class="avatar-sm" style="background: var(--navy-mid);"><%= account.fullName.charAt(0).toUpperCase() %></div>
+                                    <span><%= account.fullName %></span>
+                                </div>
+                            </td>
+                            <td><code class="mono"><%= account.username %></code></td>
+                            <td><%= formatRoleLabel(account.role) %></td>
+                            <td><%= account.department %></td>
+                            <td><%= account.branch %></td>
+                            <td>
+                                <button type="button" class="btn btn-ghost" style="padding:4px 10px;font-size:12px;" title="View assigned clients"
+                                    onclick="viewSalesClients(this.dataset.username)" data-username="<%= account.username %>">
+                                    <%= assignedCount %> <%= assignedCount === 1 ? 'client' : 'clients' %>
+                                </button>
+                            </td>
+                            <td>
+                                <% if (account.status === 'inactive') { %>
+                                    <span class="badge badge-inactive">Inactive</span>
+                                <% } else { %>
+                                    <span class="badge badge-active">Active</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="icon-btn icon-edit" title="Edit"
+                                        onclick="openEditEmployee('<%= account.username %>', '<%= account.fullName %>', '<%= account.department %>', '<%= account.branch %>')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    </button>
+                                    <button class="icon-btn icon-key" title="Reset Password"
+                                        onclick="openResetPass('<%= account.username %>')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    </button>
+                                    <% if (account.status === 'inactive') { %>
+                                    <button class="icon-btn icon-enable" title="Reactivate"
+                                        onclick="toggleEmployee('<%= account.username %>', 'active')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                                    </button>
+                                    <% } else { %>
+                                    <button class="icon-btn icon-disable" title="Deactivate"
+                                        onclick="toggleEmployee('<%= account.username %>', 'inactive')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                                    </button>
+                                    <% } %>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    <% } %>
+
+    <!-- ── CLIENTS SECTION ── -->
+    <% if (!isSales) {
+        const salesNames = {};
+        (accounts || []).filter(a => a.role === 'sales').forEach(a => { salesNames[a.username] = a.fullName; });
+        var salesNameFor = u => salesNames[u] || u || '';
+    %>
+    <section class="section" id="section-clients">
+        <div class="section-header">
+            <div>
+                <h1>Client Management</h1>
+                <p>Add, update, and toggle client partnership status.</p>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('modal-create-client')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                New Client
+            </button>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stat-chip">
+                <span class="stat-num"><%= clients.length %></span>
+                <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-num"><%= clients.filter(c => c.status !== 'inactive').length %></span>
+                <span class="stat-label">Active</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-num"><%= clients.filter(c => c.status === 'inactive').length %></span>
+                <span class="stat-label">Inactive</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <% if (!salesAssignmentAvailable) { %>
+                <p class="um-notice" style="margin:16px 20px 0;">
+                    Setup needed: run <code class="mono">database/migrations/003-client-sales-assignment.sql</code> in the Supabase SQL editor, then reload this page.
+                    Until then clients can't be assigned to sales accounts, and Sales users see no clients.
+                </p>
+            <% } %>
+            <div class="card-toolbar">
+                <div class="search-wrap">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="clientSearch" placeholder="Search client, location…" oninput="filterClients()">
+                </div>
+                <div class="search-wrap sales-filter">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                    <input type="text" id="clientSalesFilterInput" placeholder="Sales name or “Unassigned”…" autocomplete="off" spellcheck="false" aria-label="Filter by sales account">
+                    <button type="button" class="sales-filter-clear" id="clientSalesFilterClear" title="Show all sales accounts" aria-label="Clear sales account filter" hidden>×</button>
+                    <input type="hidden" id="clientSalesFilter" value="">
+                    <ul class="sales-suggest" id="clientSalesFilterList" aria-label="Sales account suggestions"></ul>
+                </div>
+                <div class="filter-tabs">
+                    <button class="filter-tab active" onclick="filterClientsByStatus('all', this)">All</button>
+                    <button class="filter-tab" onclick="filterClientsByStatus('active', this)">Active</button>
+                    <button class="filter-tab" onclick="filterClientsByStatus('inactive', this)">Inactive</button>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Client Name</th>
+                            <th>Location</th>
+                            <th>Sales Account</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clientTableBody">
+                        <% clients.forEach((client, index) => { %>
+                        <tr class="cli-row" data-status="<%= client.status === 'inactive' ? 'inactive' : 'active' %>" data-sales="<%= client.salesUsername %>" data-sales-name="<%= client.salesUsername ? salesNameFor(client.salesUsername) : 'Unassigned' %>">
+                            <td><%= index + 1 %></td>
+                            <td>
+                                <div class="person-cell">
+                                    <div class="avatar-sm avatar-client"><%= client.name.charAt(0).toUpperCase() %></div>
+                                    <span><%= client.name %></span>
+                                </div>
+                            </td>
+                            <td><%= client.location || '—' %></td>
+                            <td>
+                                <% if (client.salesUsername) { %>
+                                    <span class="sales-chip">
+                                        <span><%= salesNameFor(client.salesUsername) %></span>
+                                        <button type="button" class="sales-chip-remove" title="Unassign sales account"
+                                            aria-label="Unassign <%= salesNameFor(client.salesUsername) %> from <%= client.name %>"
+                                            onclick="unassignSales(this)"
+                                            data-client-id="<%= client.id %>" data-client-name="<%= client.name %>" data-sales-name="<%= salesNameFor(client.salesUsername) %>">×</button>
+                                    </span>
+                                <% } else { %>
+                                    <span class="sales-unassigned">Unassigned</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if (client.status === 'inactive') { %>
+                                    <span class="badge badge-inactive">Inactive</span>
+                                <% } else { %>
+                                    <span class="badge badge-active">Active</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <div class="action-btns">
+                                    <% if (salesAssignmentAvailable) { %>
+                                    <button class="icon-btn icon-key" title="Assign Sales Account"
+                                        onclick="openAssignSales(this)"
+                                        data-client-id="<%= client.id %>" data-client-name="<%= client.name %>"
+                                        data-sales-username="<%= client.salesUsername %>" data-sales-name="<%= salesNameFor(client.salesUsername) %>">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                                    </button>
+                                    <% } %>
+                                    <button class="icon-btn icon-edit" title="Edit"
+                                        onclick="openEditClient('<%= client.id %>', '<%= client.name %>', '<%= client.location %>')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    </button>
+                                    <% if (client.status === 'inactive') { %>
+                                    <button class="icon-btn icon-enable" title="Reactivate"
+                                        onclick="toggleClient('<%= client.id %>', 'active')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                                    </button>
+                                    <% } else { %>
+                                    <button class="icon-btn icon-disable" title="Deactivate"
+                                        onclick="toggleClient('<%= client.id %>', 'inactive')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                                    </button>
+                                    <% } %>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    <% } %>
+
+    <!-- ── UNITS & MODELS SECTION (admin only) ── -->
+    <% if (!isSales && unitModels) { %>
+    <section class="section" id="section-unit-models">
+        <div class="section-header">
+            <div>
+                <h1>Units &amp; Models</h1>
+                <p>Add unit types and models for the Add Printer form. Each model name can exist only once in the system.</p>
+            </div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-chip">
+                <span class="stat-num"><%= unitModels.units.length %></span>
+                <span class="stat-label">Units</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-num"><%= unitModels.totalModels %></span>
+                <span class="stat-label">Models</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-num"><%= unitModels.addedModels %></span>
+                <span class="stat-label">Added</span>
+            </div>
+        </div>
+
+        <div class="card um-add-card">
+            <% if (!unitModels.available) { %>
+                <p class="um-notice">
+                    Setup needed: run <code class="mono">database/migrations/002-unit-models.sql</code> in the Supabase SQL editor, then reload this page.
+                    The list below is the built-in catalog.
+                </p>
+            <% } else { %>
+                <form action="/admin_account/unit-models/create" method="POST" class="um-add-form" id="unitModelForm" autocomplete="off">
+                    <div class="form-group">
+                        <label for="umUnit">Unit</label>
+                        <input type="text" id="umUnit" name="unit" list="umUnitList" maxlength="40" required placeholder="Select or type a new unit">
+                        <datalist id="umUnitList">
+                            <% unitModels.units.forEach(unit => { %>
+                                <option value="<%= unit.name %>"></option>
+                            <% }) %>
+                        </datalist>
+                    </div>
+                    <div class="form-group">
+                        <label for="umModel">Model</label>
+                        <input type="text" id="umModel" name="model" maxlength="40" placeholder="e.g. 9450X (leave blank to add a unit only)">
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="umSubmit">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Add
+                    </button>
+                </form>
+                <p class="um-check" id="umCheck" aria-live="polite"></p>
+            <% } %>
+        </div>
+
+        <div class="card">
+            <div class="card-toolbar">
+                <div class="search-wrap">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="umSearch" placeholder="Search unit or model…" oninput="filterUnitModels()" autocomplete="off">
+                </div>
+                <small class="monitor-muted">Built-in models are fixed. Added models can be removed while no machine uses them.</small>
+            </div>
+            <div class="um-list" id="umList">
+                <% unitModels.units.forEach(unit => { %>
+                    <div class="um-unit" data-unit="<%= unit.name.toLowerCase() %>">
+                        <div class="um-unit-head">
+                            <strong><%= unit.name %></strong>
+                            <small><%= unit.models.length %> model<%= unit.models.length === 1 ? '' : 's' %></small>
+                            <% if (unit.id && !unit.models.length && !unit.machineCount) { %>
+                                <form action="/admin_account/unit-models/delete" method="POST" class="um-inline-form" data-confirm="Remove unit <%= unit.name %>?">
+                                    <input type="hidden" name="id" value="<%= unit.id %>">
+                                    <button type="submit" class="um-remove">Remove unit</button>
+                                </form>
+                            <% } %>
+                        </div>
+                        <div class="um-models">
+                            <% if (!unit.models.length) { %>
+                                <span class="monitor-muted">No models yet.</span>
+                            <% } %>
+                            <% unit.models.forEach(model => { %>
+                                <span class="um-chip <%= model.builtIn ? '' : 'um-chip-added' %>" data-model="<%= model.name.toLowerCase() %>"
+                                    title="<%= model.builtIn ? 'Built-in' : 'Added' + (model.createdBy ? ' by ' + model.createdBy : '') %> • <%= model.machineCount %> machine<%= model.machineCount === 1 ? '' : 's' %>">
+                                    <%= model.name %>
+                                    <% if (!model.builtIn && !model.machineCount) { %>
+                                        <form action="/admin_account/unit-models/delete" method="POST" class="um-inline-form" data-confirm="Remove model <%= unit.name %> <%= model.name %>?">
+                                            <input type="hidden" name="id" value="<%= model.id %>">
+                                            <button type="submit" class="um-chip-x" aria-label="Remove model">×</button>
+                                        </form>
+                                    <% } %>
+                                </span>
+                            <% }) %>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+            <div class="monitor-no-results" id="umNoResults" hidden>No unit or model matches that search.</div>
+        </div>
+    </section>
+    <% } %>
+
+    <!-- ── PARTS SECTION (admin only) ── -->
+    <% if (!isSales && partsCatalog) { %>
+    <section class="section" id="section-parts">
+        <div class="section-header">
+            <div>
+                <h1>Parts</h1>
+                <p>The only parts technicians can pick from when cannibalizing a unit or recording a repair. Technicians cannot add parts.</p>
+            </div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-chip">
+                <span class="stat-num"><%= partsCatalog.parts.length %></span>
+                <span class="stat-label">Parts</span>
+            </div>
+        </div>
+
+        <div class="card um-add-card">
+            <form action="/admin_account/parts/save" method="POST" class="parts-form" id="partsForm" autocomplete="off">
+                <input type="hidden" name="id" id="partsId" value="">
+                <div class="form-group">
+                    <label for="partsUnit">Unit</label>
+                    <select id="partsUnit" name="unit" required>
+                        <option value="">Select unit</option>
+                        <% partsCatalog.units.forEach(unit => { %>
+                            <option value="<%= unit %>"><%= unit %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="partsNumber">Part Number</label>
+                    <input type="text" id="partsNumber" name="partNumber" maxlength="100" required placeholder="e.g. ENM 38941">
+                </div>
+                <div class="form-group">
+                    <label for="partsDescription">Part Description</label>
+                    <input type="text" id="partsDescription" name="description" maxlength="255" required placeholder="e.g. GUTTER BLOCK">
+                </div>
+                <button type="submit" class="btn btn-primary" id="partsSubmit">Add Part</button>
+                <button type="button" class="btn btn-ghost" id="partsCancel" hidden>Cancel</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <div class="card-toolbar">
+                <div class="search-wrap">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="partsSearch" placeholder="Search part number, description or unit…" autocomplete="off">
+                </div>
+                <select id="partsUnitFilter" class="parts-filter">
+                    <option value="">All units</option>
+                    <% partsCatalog.units.forEach(unit => { %>
+                        <option value="<%= unit.toLowerCase() %>"><%= unit %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <div class="parts-list" id="partsList">
+                <% partsCatalog.parts.forEach(part => { %>
+                    <div class="parts-row" data-id="<%= part.id %>" data-unit="<%= part.unit %>" data-number="<%= part.partNumber %>" data-description="<%= part.description %>"
+                        data-search="<%= (part.unit + ' ' + part.partNumber + ' ' + part.description).toLowerCase() %>">
+                        <span class="parts-row-unit"><%= part.unit || '—' %></span>
+                        <span class="parts-row-number"><%= part.partNumber %></span>
+                        <span class="parts-row-desc"><%= part.description %></span>
+                        <span class="parts-row-actions">
+                            <button type="button" class="um-remove parts-edit-btn" style="color:var(--navy);">Edit</button>
+                            <form action="/admin_account/parts/delete" method="POST" class="um-inline-form" data-confirm="Remove part <%= part.partNumber %>?">
+                                <input type="hidden" name="id" value="<%= part.id %>">
+                                <button type="submit" class="um-remove">Remove</button>
+                            </form>
+                        </span>
+                    </div>
+                <% }) %>
+            </div>
+            <div class="monitor-no-results" id="partsNoResults" <%= partsCatalog.parts.length ? 'hidden' : '' %>>
+                <%= partsCatalog.parts.length ? 'No part matches that search.' : 'No parts yet. Add the first one above.' %>
+            </div>
+        </div>
+    </section>
+    <% } %>
+
+    <!-- ── MONITORING SECTION ── -->
+    <section class="section <%= isSales ? 'active' : '' %>" id="section-monitoring">
+        <div class="section-header monitor-section-header">
+            <div>
+                <h1>Monitoring Overview</h1>
+                <p>Live operational view from client machine activity and service records.</p>
+            </div>
+            <div class="monitor-range-wrap">
+                <% if (isSales) { %>
+                <a class="btn btn-ghost btn-employee-view" href="/user_account" title="Open user interface" style="margin-right: 10px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <circle cx="12" cy="8" r="4"/>
+                        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                    </svg>
+                    User View
+                </a>
+                <% } %>
+                <% if (!isSales) { %>
+                <label for="monitorDateRange" class="monitor-range-label">Show data for</label>
+                <% } %>
+                <select id="monitorDateRange" class="monitor-select monitor-range-select" onchange="onMonitorRangeChange(this.value)">
+                    <option value="today" selected>Today</option>
+                    <option value="this-month">This Month</option>
+                    <option value="last-month">Last Month</option>
+                    <option value="last-year">Last Year</option>
+                    <option value="all">All Time</option>
+                    <option value="q1">Q1 (Jan – Mar)</option>
+                    <option value="q2">Q2 (Apr – Jun)</option>
+                    <option value="q3">Q3 (Jul – Sep)</option>
+                    <option value="q4">Q4 (Oct – Dec)</option>
+                    <option value="custom">Custom range…</option>
+                </select>
+                <div id="monitorCustomRangeWrap" class="monitor-custom-range" style="display:none;">
+                    <input type="date" id="monitorCustomStart" class="monitor-select monitor-custom-date" aria-label="Custom range start date">
+                    <span class="monitor-custom-range-sep">to</span>
+                    <input type="date" id="monitorCustomEnd" class="monitor-select monitor-custom-date" aria-label="Custom range end date">
+                    <button type="button" class="btn btn-primary monitor-custom-apply" onclick="applyCustomMonitorRange()">Apply</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-row monitor-kpis" id="monitorKpiRow">
+            <div class="stat-chip stat-chip-clickable" data-kpi="pendingUnits" onclick="openKpiDetail('pendingUnits')" title="Click to see details">
+                <span class="stat-num" id="kpi-pendingUnits"><%= monitoring.pendingUnits %></span>
+                <span class="stat-label">Pending Units (maintenance)</span>
+            </div>
+            <div class="stat-chip stat-chip-clickable" data-kpi="faultyUnits" onclick="openKpiDetail('faultyUnits')" title="Click to see details">
+                <span class="stat-num" id="kpi-faultyUnits"><%= monitoring.faultyUnits %></span>
+                <span class="stat-label">Pending Units (faulty)</span>
+            </div>
+            <div class="stat-chip stat-chip-clickable" data-kpi="techReports" onclick="openKpiDetail('techReports')" title="Click to see details">
+                <span class="stat-num" id="kpi-techReports"><%= monitoring.reportsInRange %></span>
+                <span class="stat-label">Tech Reports Log</span>
+            </div>
+            <div class="stat-chip stat-chip-clickable" data-kpi="unitsInstalled" onclick="openKpiDetail('unitsInstalled')" title="Click to see details">
+                <span class="stat-num" id="kpi-unitsInstalled"><%= monitoring.unitsInstalledInRange %></span>
+                <span class="stat-label">Units Installed</span>
+            </div>
+            <div class="stat-chip stat-chip-clickable" data-kpi="unitsDisabled" onclick="openKpiDetail('unitsDisabled')" title="Click to see details">
+                <span class="stat-num" id="kpi-unitsDisabled"><%= monitoring.unitsDisabled %></span>
+                <span class="stat-label">Units Disabled</span>
+            </div>
+            <div class="stat-chip stat-chip-clickable" data-kpi="completionRate" onclick="openKpiDetail('completionRate')" title="Click to see details">
+                <span class="stat-num" id="kpi-completionRate"><%= monitoring.completionRate %>%</span>
+                <span class="stat-label">Completion Rate</span>
+            </div>
+        </div>
+
+
+        <div class="monitor-grid">
+            <article class="card monitor-card monitor-card-emphasis monitor-scroll-card">
+                <header class="monitor-card-head">
+                    <h3>Install Base Profile</h3>
+                    <small id="installBaseSummary"><%= monitoring.installBaseTotalUnits %> units &middot; <%= monitoring.installedUnitTypes %> of <%= monitoring.catalogUnitTypes %> unit types in service</small>
+                </header>
+                <%
+                    // The composition bar and the catalog list are built from the
+                    // same rules the client-side re-render uses when the date
+                    // range changes — see renderInstallBase() in admin_account.js.
+                    const ibRows = monitoring.installBaseShare || [];
+                    const ibMax = ibRows.reduce((max, row) => Math.max(max, row.count), 0);
+                    const ibSegClass = row => (row.colorIndex >= 0 ? `ib-seg--${row.colorIndex}` : 'ib-seg--x');
+                    const ibBody = row => `${row.count} ${row.count === 1 ? 'unit' : 'units'} · ${row.percentage}% of fleet`;
+                    const ibNote = row => {
+                        const models = (row.models || []).map(m => `${m.model} (${m.count})`).join(', ');
+                        return models ? `Top models: ${models}` : '';
+                    };
+                    const ibActive = ibRows.filter(row => row.count > 0);
+                    // Catalog entries past the 8 categorical hues share one neutral
+                    // segment rather than getting a 9th hue nobody could tell apart.
+                    const ibHued = ibActive.filter(row => row.colorIndex >= 0);
+                    const ibFolded = ibActive.filter(row => row.colorIndex < 0);
+                    const ibSegments = ibHued.slice();
+                    if (ibFolded.length) {
+                        ibSegments.push({
+                            label: 'Other',
+                            colorIndex: -1,
+                            count: ibFolded.reduce((sum, row) => sum + row.count, 0),
+                            percentage: ibFolded.reduce((sum, row) => sum + row.percentage, 0),
+                            share: ibFolded.reduce((sum, row) => sum + row.share, 0),
+                            // The grouped "Other" row already lists its models; other folded rows are listed by name.
+                            models: ibFolded.flatMap(row => (row.isOther ? row.models : [{ model: row.label, count: row.count }]))
+                        });
+                    }
+                %>
+                <div class="install-base" id="installBaseCard">
+                    <div id="installBaseBarSlot">
+                    <% if (!ibSegments.length) { %>
+                        <div class="ib-bar-empty" role="img" aria-label="No units installed"></div>
+                    <% } else { %>
+                        <div class="ib-bar" id="installBaseBar" role="img"
+                             aria-label="Unit type mix: <%= ibSegments.map(row => `${row.label} ${row.percentage} percent`).join(', ') %>">
+                            <% ibSegments.forEach(row => { %>
+                                <span class="ib-seg <%= ibSegClass(row) %>"
+                                      style="width: <%= row.share.toFixed(2) %>%"
+                                      data-tip-title="<%= row.label %>"
+                                      data-tip-body="<%= ibBody(row) %>"
+                                      data-tip-note="<%= ibNote(row) %>">
+                                    <%# A label only goes inside a segment wide enough to hold it; the
+                                        list below carries every value either way. %>
+                                    <% if (row.share >= 14) { %>
+                                        <span class="ib-seg-label"><%= row.label %> <%= row.percentage %>%</span>
+                                    <% } %>
+                                </span>
+                            <% }) %>
+                        </div>
+                    <% } %>
+                    </div>
+                    <ul class="ib-list monitor-scroll-body" id="installBaseList">
+                        <% let ibDividerDone = false; %>
+                        <% ibRows.forEach(row => { %>
+                            <% if (!row.count && !ibDividerDone && ibActive.length) { ibDividerDone = true; %>
+                                <li class="ib-divider">Not in service</li>
+                            <% } %>
+                            <li class="ib-row <%= row.count ? '' : 'ib-row--idle' %>"
+                                data-tip-title="<%= row.label %>"
+                                data-tip-body="<%= row.count ? ibBody(row) : 'No units installed' %>"
+                                data-tip-note="<%= ibNote(row) %>">
+                                <span class="ib-chip <%= row.colorIndex >= 0 ? `ib-chip--${row.colorIndex}` : 'ib-chip--x' %>"></span>
+                                <span class="ib-name"><%= row.label %></span>
+                                <span class="ib-track">
+                                    <% if (row.count) { %>
+                                        <span class="ib-fill <%= row.colorIndex >= 0 ? `ib-fill--${row.colorIndex}` : 'ib-fill--x' %>"
+                                              style="width: <%= ibMax > 0 ? ((row.count / ibMax) * 100).toFixed(2) : 0 %>%"></span>
+                                    <% } %>
+                                </span>
+                                <span class="ib-count"><%= row.count %></span>
+                                <span class="ib-pct"><%= row.count ? row.percentage + '%' : '—' %></span>
+                            </li>
+                        <% }) %>
+                    </ul>
+                </div>
+            </article>
+            <%
+                // Repair Parts Monitoring: parts picked under "Parts Used" on Repair
+                // activities, ranked by use and grouped by unit type. The same shape
+                // renderRepairParts() rebuilds in admin_account.js when the date
+                // range changes.
+                const rpu = monitoring.repairPartsUsage || { groups: [], repairs: 0, totalUsed: 0, distinctParts: 0 };
+                const rpuModels = part => (part.models || []).map(m => `${m.model} (${m.count})`).join(', ');
+            %>
+            <article class="card monitor-card monitor-card-half monitor-scroll-card">
+                <header class="monitor-card-head">
+                    <h3>Repair Parts Monitoring</h3>
+                    <small id="repairPartsSummary"><%= rpu.totalUsed %> <%= rpu.totalUsed === 1 ? 'part' : 'parts' %> used &middot; <%= rpu.repairs %> <%= rpu.repairs === 1 ? 'repair' : 'repairs' %></small>
+                </header>
+                <div class="repair-parts monitor-scroll-body" id="repairPartsList">
+                    <% if (!rpu.groups.length) { %>
+                        <p class="monitor-empty">No parts used on repairs in this period.</p>
+                    <% } %>
+                    <% rpu.groups.forEach(group => { const groupMax = group.parts.length ? group.parts[0].count : 0; %>
+                        <section class="rp-group">
+                            <div class="rp-group-head">
+                                <h4><%= group.unit %> Parts Distribution</h4>
+                                <span><%= group.total %> used &middot; <%= group.repairs %> <%= group.repairs === 1 ? 'repair' : 'repairs' %></span>
+                            </div>
+                            <ol class="rp-list">
+                                <% group.parts.forEach((part, i) => { %>
+                                    <li class="rp-row<%= i === 0 ? ' rp-row--top' : '' %>" title="<%= part.name %>: used on <%= part.count %> <%= part.count === 1 ? 'repair' : 'repairs' %><%= rpuModels(part) ? ` · ${rpuModels(part)}` : '' %>">
+                                        <span class="rp-rank"><%= i + 1 %></span>
+                                        <span class="rp-name"><%= part.name %></span>
+                                        <span class="rp-track"><span class="rp-fill" style="width: <%= groupMax > 0 ? ((part.count / groupMax) * 100).toFixed(2) : 0 %>%"></span></span>
+                                        <span class="rp-count"><%= part.count %></span>
+                                    </li>
+                                <% }) %>
+                            </ol>
+                        </section>
+                    <% }) %>
+                </div>
+            </article>
+
+            <article class="card monitor-card monitor-card-half">
+                <header class="monitor-card-head">
+                    <h3>Tech Reports Log</h3>
+                    <small id="techReportLogSummary"><%= monitoring.reportsInRange %> <%= monitoring.reportsInRange === 1 ? 'report' : 'reports' %> · <%= monitoring.techReportLog.length %> <%= monitoring.techReportLog.length === 1 ? 'technician' : 'technicians' %></small>
+                </header>
+                <%
+                    // Ranked one bar per technician — the same shape
+                    // renderTechReportLog() rebuilds in admin_account.js when the
+                    // date range changes.
+                    const techLog = monitoring.techReportLog || [];
+                    const techLogMax = techLog.reduce((max, row) => Math.max(max, row.total), 0);
+                %>
+                <div class="tech-report-legend">
+                    <span class="is-resolved"><i></i>Resolved (Finished)</span>
+                    <span class="is-unresolved"><i></i>Unresolved (any other status)</span>
+                </div>
+                <div class="tech-report-chart-wrap" id="techReportLogWrap">
+                    <% if (!techLog.length) { %>
+                        <p class="monitor-empty">No reports logged in this period.</p>
+                    <% } else { %>
+                        <div class="tech-report-chart" id="techReportLogChart">
+                            <% techLog.forEach((row, i) => {
+                                const resolved = row.resolved || 0;
+                                const unresolved = row.unresolved != null ? row.unresolved : row.total - resolved;
+                            %>
+                                <div class="tech-report-row<%= i === 0 ? ' tech-report-row--top' : '' %>">
+                                    <div class="tech-report-head">
+                                        <strong><%= row.name %></strong>
+                                        <span>
+                                            <span class="tech-report-split">
+                                                <span class="is-resolved" title="Resolved"><%= resolved %> resolved</span>
+                                                <span class="is-unresolved" title="Unresolved"><%= unresolved %> unresolved</span>
+                                            </span>
+                                            <span class="tech-report-total" title="<%= row.name %> is named on <%= row.total %> of the <%= monitoring.reportsInRange %> reports"><%= row.total %></span>
+                                        </span>
+                                    </div>
+                                    <div class="tech-report-track">
+                                        <span class="tech-report-fill"
+                                              style="width: <%= techLogMax > 0 ? ((row.total / techLogMax) * 100).toFixed(2) : 0 %>%">
+                                            <span class="tech-report-seg tech-report-seg--resolved" style="flex: <%= resolved %> 1 0"></span>
+                                            <span class="tech-report-seg tech-report-seg--unresolved" style="flex: <%= unresolved %> 1 0"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        </div>
+                    <% } %>
+                </div>
+            </article>
+
+            <article class="card monitor-card monitor-card-half">
+                <header class="monitor-card-head">
+                    <h3>Today's Serial Number Status</h3>
+                    <small>Latest status per serial number logged today. The date range does not apply.</small>
+                </header>
+                <%
+                    const todayStatus = monitoring.todaySerialStatus || { rows: [], counts: {}, total: 0 };
+                %>
+                <div id="todaySerialStatusWrap">
+                    <div class="today-status-summary">
+                        <span class="today-status-chip today-status--in_progress"><%= todayStatus.counts.in_progress || 0 %> In progress</span>
+                        <span class="today-status-chip today-status--finished"><%= todayStatus.counts.finished || 0 %> Finished</span>
+                        <span class="today-status-chip today-status--out_of_service"><%= todayStatus.counts.out_of_service || 0 %> Out of service</span>
+                    </div>
+                    <% if (!todayStatus.rows.length) { %>
+                        <p class="monitor-empty">No technician activity logged today.</p>
+                    <% } else { %>
+                        <div class="today-status-list">
+                            <% todayStatus.rows.forEach(row => { %>
+                                <div class="today-status-row">
+                                    <div class="today-status-head">
+                                        <strong><%= row.technicians %></strong>
+                                        <span class="today-status-tag today-status--<%= row.group %>"><%= row.statusLabel %></span>
+                                    </div>
+                                    <div class="today-status-meta"><%= row.client %> · <%= row.serialNo %></div>
+                                </div>
+                            <% }) %>
+                        </div>
+                    <% } %>
+                </div>
+            </article>
+
+        </div>
+    </section>
+
+    <!-- ── TECHNICIAN HISTORY SECTION ── -->
+    <section class="section" id="section-tech-history">
+        <div class="section-header">
+            <div>
+                <h1>Technician History</h1>
+                <p>Work each technician did, dated by SMR date. Records without an SMR date are not listed.</p>
+            </div>
+        </div>
+
+        <!-- Step 1: every technician -->
+        <div id="techHistoryListView">
+            <div class="stats-row">
+                <div class="stat-chip">
+                    <span class="stat-num" id="techHistoryTechCount"><%= monitoring.technicianHistory.technicians.length %></span>
+                    <span class="stat-label">Technicians</span>
+                </div>
+                <div class="stat-chip">
+                    <span class="stat-num" id="techHistoryRowCount"><%= monitoring.technicianHistory.rows.length %></span>
+                    <span class="stat-label">Dated Records</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-toolbar">
+                    <div class="search-wrap">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="techHistorySearch" placeholder="Search technician…" oninput="filterTechHistoryList()" autocomplete="off">
+                    </div>
+                    <small class="monitor-muted">Sorted by highest record count</small>
+                </div>
+                <div class="tech-history-grid" id="techHistoryGrid"></div>
+                <div class="monitor-no-results" id="techHistoryNoTechs" hidden>No technician matches that search.</div>
+            </div>
+        </div>
+
+        <!-- Step 2: one technician's history -->
+        <div id="techHistoryDetailView" hidden>
+            <div class="card">
+                <div class="card-toolbar">
+                    <div class="tech-history-detail-head">
+                        <button type="button" class="btn btn-ghost" onclick="closeTechHistory()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                            All technicians
+                        </button>
+                        <small class="monitor-muted" id="techHistoryMeta"></small>
+                    </div>
+                    <div class="search-wrap">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="techHistoryRowSearch" placeholder="Search client, serial, activity…" oninput="renderTechHistoryRows()" autocomplete="off">
+                    </div>
+                </div>
+                <div class="table-wrap monitor-scroll-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>SMR Date</th>
+                                <th>Client</th>
+                                <th>Unit / Model</th>
+                                <th>Activity</th>
+                                <th>Details</th>
+                                <th>With</th>
+                            </tr>
+                        </thead>
+                        <tbody id="techHistoryBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── TRANSFER UNIT SECTION (admin only) ── -->
+    <% if (!isSales && transferMachines) { %>
+    <section class="section" id="section-unit-transfer">
+        <div class="section-header">
+            <div>
+                <h1>Transfer Unit</h1>
+                <p>Move a serial number to another client — when it was encoded under the wrong client, or the unit was moved to a new site. Its service history moves with it.</p>
+            </div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-chip">
+                <span class="stat-num"><%= transferMachines.length %></span>
+                <span class="stat-label">Units</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-num"><%= clients.filter(c => c.status !== 'inactive').length %></span>
+                <span class="stat-label">Active Clients</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-num" id="transferDisabledCount"><%= transferMachines.filter(m => m.disabledAt).length %></span>
+                <span class="stat-label">Disabled</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-toolbar">
+                <div class="search-wrap">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="transferSearch" placeholder="Search serial number…" oninput="renderTransferRows()" autocomplete="off">
+                </div>
+                <div class="transfer-client-autocomplete">
+                    <input type="text" id="transferClientFilter" class="monitor-select" placeholder="All clients" autocomplete="off">
+                    <ul id="transferClientDropdown" class="transfer-client-dropdown"></ul>
+                </div>
+            </div>
+            <div class="table-wrap monitor-scroll-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Serial No.</th>
+                            <th>Unit / Model</th>
+                            <th>Current Client</th>
+                            <th>Installed</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="transferBody"></tbody>
+                </table>
+            </div>
+            <div class="monitor-no-results" id="transferNoResults" hidden>No unit matches that search.</div>
+            <p class="transfer-more" id="transferMore" hidden></p>
+        </div>
+    </section>
+    <% } %>
+
+    <!-- ── SCHEDULING SECTION (admin only) ── -->
+    <% if (!isSales && schedules) { %>
+    <section class="section" id="section-scheduling">
+        <div class="section-header">
+            <div>
+                <h1>Scheduling</h1>
+                <p>Assign a technician to a client site on a date, with the work to be done. Technicians see their schedules on their phone.</p>
+            </div>
+            <% if (schedules.available) { %>
+            <button class="btn btn-primary" onclick="openScheduleForm()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                New Schedule
+            </button>
+            <% } %>
+        </div>
+
+        <% if (!schedules.available) { %>
+            <div class="card">
+                <p class="um-notice">
+                    Setup needed: run <code class="mono">database/migrations/005-schedules.sql</code> in the Supabase SQL editor, then reload this page.
+                </p>
+            </div>
+        <% } else { %>
+        <div class="stats-row">
+            <div class="stat-chip">
+                <span class="stat-num" id="schedStatToday">0</span>
+                <span class="stat-label">Today</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-num" id="schedStatUpcoming">0</span>
+                <span class="stat-label">Upcoming</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-num" id="schedStatDone">0</span>
+                <span class="stat-label">Done</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-toolbar">
+                <div class="search-wrap">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="scheduleSearch" placeholder="Search technician, client, location…" oninput="renderSchedules()" autocomplete="off">
+                </div>
+                <div class="filter-tabs" id="scheduleFilterTabs">
+                    <button class="filter-tab active" onclick="setScheduleFilter('upcoming', this)">Today &amp; Upcoming</button>
+                    <button class="filter-tab" onclick="setScheduleFilter('past', this)">Past</button>
+                    <button class="filter-tab" onclick="setScheduleFilter('all', this)">All</button>
+                </div>
+            </div>
+            <div class="table-wrap monitor-scroll-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date &amp; Time</th>
+                            <th>Technician</th>
+                            <th>Client / Location</th>
+                            <th>Work Description</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleBody"></tbody>
+                </table>
+            </div>
+            <div class="monitor-no-results" id="scheduleNoResults" hidden>No schedules here yet.</div>
+        </div>
+        <% } %>
+    </section>
+    <% } %>
+
+    <!-- ── ACTIVITY LOG SECTION ── -->
+    <section class="section" id="section-activity-log">
+        <div class="section-header">
+            <div>
+                <h1>Technician Activity Log</h1>
+                <p>
+                    <%= monitoring.activityRowTotal != null ? monitoring.activityRowTotal : monitoring.activityRows.length %> technician actions recorded
+                    <% if (monitoring.activityRowsCapped) { %>
+                        (showing newest <%= monitoring.activityRows.length %> — set MONITOR_ACTIVITY_ROW_CAP=0 on the server for all rows; may be slower)
+                    <% } %>
+                </p>
+            </div>
+        </div>
+
+        <div class="card monitor-card monitor-scroll-card" id="monitorActivityCard">
+            <header class="monitor-card-head">
+                <small>Filter by technician, client, location, unit, model, installed records, maintenance, or parts, then export the visible rows to CSV.</small>
+            </header>
+
+            <div class="monitor-toolbar">
+                <div class="monitor-controls">
+                    <div class="monitor-search-wrap">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <input type="text" id="monitorSerialSearch" class="monitor-search-input"
+                            placeholder="Search serial number…" autocomplete="off"
+                            oninput="applyMonitoringFilters()">
+                    </div>
+
+                    <div class="monitor-search-wrap monitor-filter-search">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <input type="search" id="monitorTechnicianFilter" class="monitor-search-input"
+                            list="monitorTechnicianOptions" placeholder="Search technician…" aria-label="Search technician"
+                            autocomplete="off" oninput="applyMonitoringFilters()">
+                    </div>
+                    <datalist id="monitorTechnicianOptions">
+                        <% monitoring.technicianOptions.forEach(name => { %>
+                            <option value="<%= name %>"><%= name %></option>
+                        <% }) %>
+                    </datalist>
+
+                    <div class="monitor-search-wrap monitor-filter-search">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <input type="search" id="monitorClientFilter" class="monitor-search-input"
+                            list="monitorClientOptions" placeholder="Search client…" aria-label="Search client"
+                            autocomplete="off" oninput="applyMonitoringFilters()">
+                    </div>
+                    <datalist id="monitorClientOptions">
+                        <% monitoring.clientOptions.forEach(name => { %>
+                            <option value="<%= name %>"><%= name %></option>
+                        <% }) %>
+                    </datalist>
+
+                    <div class="monitor-search-wrap monitor-filter-search">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <circle cx="11" cy="11" r="8" /><path d="m16.65 16.65 4 4" />
+                        </svg>
+                        <input type="search" id="monitorLocationFilter" class="monitor-search-input"
+                            placeholder="Search client location…" aria-label="Search client location"
+                            autocomplete="off" oninput="applyMonitoringFilters()">
+                    </div>
+
+                    <select id="monitorUnitFilter" class="monitor-select" onchange="handleMonitoringUnitFilterChange()">
+                        <option value="">All units</option>
+                        <% monitoring.unitOptions.forEach(name => { %>
+                            <option value="<%= name %>"><%= name %></option>
+                        <% }) %>
+                    </select>
+
+                    <div class="monitor-search-wrap monitor-filter-search">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <input type="search" id="monitorModelFilter" class="monitor-search-input"
+                            list="monitorModelOptions" placeholder="Search model…" aria-label="Search model"
+                            autocomplete="off" oninput="applyMonitoringFilters()">
+                    </div>
+                    <datalist id="monitorModelOptions">
+                        <% (monitoring.modelOptions || []).forEach(name => { %>
+                            <option value="<%= name %>"><%= name %></option>
+                        <% }) %>
+                    </datalist>
+
+                    <select id="monitorTypeFilter" class="monitor-select" onchange="applyMonitoringFilters()">
+                        <option value="">All activity</option>
+                        <option value="installed">Unit Installed</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="parts">Parts Change</option>
+                        <option value="repair">Repair</option>
+                        <option value="inspection">Inspection</option>
+                        <option value="pull_out">Pull Out</option>
+                        <option value="cannibalize">Cannibalize</option>
+                    </select>
+
+                    <select id="monitorSortFilter" class="monitor-select" onchange="sortMonitoringRows()">
+                        <option value="date-desc">Sort by date (newest first)</option>
+                        <option value="date-asc">Sort by date (oldest first)</option>
+                        <option value="technician-asc">Sort by technician (A-Z)</option>
+                        <option value="technician-desc">Sort by technician (Z-A)</option>
+                        <option value="client-asc">Sort by client (A-Z)</option>
+                        <option value="client-desc">Sort by client (Z-A)</option>
+                    </select>
+                </div>
+
+                <button type="button" class="btn btn-primary monitor-export-btn" onclick="exportMonitoringCsv()">
+                    Export CSV
+                </button>
+            </div>
+
+            <div class="monitor-results">
+                <small>Current selection</small>
+                <span class="monitor-results-count" id="monitorResultsCount"><%= monitoring.activityRows.length %> of <%= monitoring.activityRowTotal != null ? monitoring.activityRowTotal : monitoring.activityRows.length %></span>
+            </div>
+
+            <div class="monitor-no-results" id="monitorNoResults" hidden>No matching technician activity was found for the selected filters.</div>
+
+            <div class="table-wrap monitor-scroll-body">
+                <table id="monitorActivityTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Technician</th>
+                            <th>Client</th>
+                            <th>Location</th>
+                            <th>Unit</th>
+                            <th>Model</th>
+                            <th>Activity</th>
+                            <th>Parts Affected</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monitorActivityBody">
+                        <% if (!monitoring.activityRows.length) { %>
+                            <tr>
+                                <td colspan="9" class="monitor-empty-state">No technician activity recorded yet.</td>
+                            </tr>
+                        <% } %>
+                        <% monitoring.activityRows.forEach((row, index) => { %>
+                            <tr
+                                class="monitor-row"
+                                data-date-sort="<%= row.dateSort %>"
+                                data-technician="<%= row.technicianSort || row.technician %>"
+                                data-technicians="<%= row.technician %>"
+                                data-submitted-by="<%= row.submittedBy || row.technician %>"
+                                data-technicians-text="<%= row.techniciansText || row.technician %>"
+                                data-client="<%= row.clientName %>"
+                                data-location="<%= row.clientLocation || '' %>"
+                                data-unit="<%= row.unitName %>"
+                                data-model="<%= row.modelName %>"
+                                data-serial-no="<%= row.serialNo || '' %>"
+                                data-running-hours="<%= row.runningHours || '' %>"
+                                data-type="<%= row.activityKind %>"
+                                data-activity-tags="<%= Array.isArray(row.activityTags) ? row.activityTags.join(',') : row.activityKind %>"
+                                data-status="<%= (row.machineStatus || '').toLowerCase() %>"
+                                data-description="<%= row.description || '' %>"
+                                data-problem="<%= row.problem || '' %>"
+                                data-action="<%= row.action || '' %>"
+                                data-recommendation="<%= row.recommendation || '' %>"
+                                data-maintenance-summary="<%= row.maintenanceSummary || '' %>"
+                                data-parts-csv="<%= row.partsCsv || '' %>"
+                                data-row-index="<%= index %>"
+                            >
+                                <td class="monitor-date"><%= row.dateLabel %></td>
+                                <td>
+                                    <div class="monitor-cell-stack">
+                                        <strong><%= row.technician %></strong>
+                                        <small><%= row.sourceLabel %> • <%= row.machineStatus %></small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="monitor-cell-stack">
+                                        <strong><%= row.clientName %></strong>
+                                        <code class="mono monitor-serial-chip"><%= row.serialNo %></code>
+                                    </div>
+                                </td>
+                                <td class="monitor-client-location"><%= row.clientLocation || '—' %></td>
+                                <td><%= row.unitName %></td>
+                                <td><%= row.modelName %></td>
+                                <td><span class="monitor-type-pill"><%= row.activityLabel %></span></td>
+                                <td class="monitor-parts-list"><%= row.partsLabel %></td>
+                                <td class="monitor-parts-list"><%= row.details %></td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+            <div class="monitor-activity-resize-handle" id="monitorActivityResizeHandle"
+                role="separator" aria-orientation="horizontal" aria-label="Resize technician activity log"
+                aria-valuemin="420" aria-valuenow="520" tabindex="0"
+                title="Drag up or down to resize the activity log. Double-click to reset.">
+                <span aria-hidden="true"></span>
+                <small>Drag to show more rows</small>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="section-serial-search">
+        <div class="section-header">
+            <div>
+                <h1>Serial Number Search</h1>
+                <p>Find a machine across all clients and view its complete history and service reports.</p>
+            </div>
+        </div>
+        <div class="card serial-search-card">
+            <form id="serialSearchForm" class="serial-search-form" role="search">
+                <div class="serial-search-field">
+                    <label for="serialSearchInput">Serial number</label>
+                    <input id="serialSearchInput" name="serial" type="search" maxlength="100" required placeholder="Enter all or part of a serial number" autocomplete="off" aria-describedby="serialSearchHint">
+                    <small id="serialSearchHint">Includes inactive clients and disabled units. Search ignores upper/lower case.</small>
+                </div>
+                <button class="btn btn-primary" type="submit" id="serialSearchSubmit">Search</button>
+            </form>
+            <p id="serialSearchStatus" class="serial-search-status" role="status" aria-live="polite">Enter a serial number to search.</p>
+            <div class="table-wrap" id="serialSearchResults" hidden>
+                <table>
+                    <thead><tr><th>Serial number</th><th>Unit / Model</th><th>Client / Location</th><th>Status</th><th>Records</th></tr></thead>
+                    <tbody id="serialSearchRows"></tbody>
+                </table>
+            </div>
+            <div class="serial-search-pagination" id="serialSearchPagination" hidden>
+                <button type="button" class="btn btn-outline" id="serialSearchPrevious">Previous</button>
+                <span id="serialSearchPage"></span>
+                <button type="button" class="btn btn-outline" id="serialSearchNext">Next</button>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- ══════════════════════════════════════════
+     MODALS
+═══════════════════════════════════════════ -->
+
+<% if (!isSales) { %>
+<!-- Modal: Invite Technician -->
+<div class="modal-overlay" id="modal-invite-employee" onclick="closeOnOverlay(event, 'modal-invite-employee')">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Send Account Invite</h3>
+            <button type="button" class="modal-close" onclick="closeModal('modal-invite-employee')">×</button>
+        </div>
+        <form action="/admin_account/employees/invite" method="POST">
+            <div class="modal-body">
+                <p class="modal-desc">
+                    Enter the recipient's email and details. They will receive a secure one-time link to set up their own username and password.
+                </p>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="inviteEmail" placeholder="technician@msi.com" required autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select name="inviteRole" required>
+                            <option value="">Select Role</option>
+                            <option value="employee">Technician</option>
+                            <option value="sales">Sales</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Branch</label>
+                        <select name="inviteBranch" required>
+                            <option value="">Select Branch</option>
+                            <option value="Silang">Silang</option>
+                            <option value="Davao">Davao</option>
+                            <option value="Cebu">Cebu</option>
+                            <option value="Manila">Manila</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Department</label>
+                    <select name="inviteDept" id="inviteDeptInput" required>
+                        <option value="">Select Department</option>
+                        <option value="TECHNICAL DEPARTMENT">Technical Department</option>
+                        <option value="SALES DEPARTMENT">Sales Department</option>
+                    </select>
+                    <small>Invite link expires in 24 hours.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('modal-invite-employee')">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    Send Invite
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Edit Technician -->
+<div class="modal-overlay" id="modal-edit-employee" onclick="closeOnOverlay(event, 'modal-edit-employee')">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Edit Technician</h3>
+            <button type="button" class="modal-close" onclick="closeModal('modal-edit-employee')">×</button>
+        </div>
+        <form action="/admin_account/employees/update" method="POST">
+            <input type="hidden" name="username" id="editEmpUsername">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="fullName" id="editEmpFullName"
+                        pattern="^[A-Za-z\s]+$" title="Letters and spaces only" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Department</label>
+                        <select name="department" id="editEmpDept" required>
+                            <option value="TECHNICAL DEPARTMENT">Technical Department</option>
+                            <option value="SALES DEPARTMENT">Sales Department</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Branch</label>
+                        <select name="branch" id="editEmpBranch" required>
+                            <option value="Silang">Silang</option>
+                            <option value="Davao">Davao</option>
+                            <option value="Cebu">Cebu</option>
+                            <option value="Manila">Manila</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('modal-edit-employee')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Reset Password -->
+<div class="modal-overlay" id="modal-reset-pass" onclick="closeOnOverlay(event, 'modal-reset-pass')">
+    <div class="modal modal-sm">
+        <div class="modal-header">
+            <h3>Send Reset Link</h3>
+            <button type="button" class="modal-close" onclick="closeModal('modal-reset-pass')">×</button>
+        </div>
+        <form action="/admin_account/employees/reset-password" method="POST">
+            <input type="hidden" name="username" id="resetPassUsername">
+            <div class="modal-body">
+                <p class="modal-desc">Send a secure password reset link for: <strong id="resetPassDisplay"></strong></p>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input
+                        type="email"
+                        name="resetEmail"
+                        placeholder="technician@msi.com"
+                        pattern="^(?=.{1,254}$)(?=.{1,64}@)[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+                        maxlength="254"
+                        required
+                    >
+                    <small>Technician will receive a one-time link to create a new password.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('modal-reset-pass')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Send Reset Link</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Hidden form: Toggle Employee Status -->
+<form id="form-toggle-emp" action="/admin_account/employees/toggle" method="POST" style="display:none">
+    <input type="hidden" name="username" id="toggleEmpUsername">
+    <input type="hidden" name="status"   id="toggleEmpStatus">
+</form>
+
+<!-- Modal: Create Client -->
+<div class="modal-overlay" id="modal-create-client" onclick="closeOnOverlay(event, 'modal-create-client')">
+    <div class="modal modal-sm">
+        <div class="modal-header">
+            <h3>Add New Client</h3>
+            <button class="modal-close" onclick="closeModal('modal-create-client')">×</button>
+        </div>
+        <form action="/admin_account/clients/create" method="POST">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Client Name</label>
+                    <input type="text" name="clientName" placeholder="Acme Corp" required>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" name="location" placeholder="Manila">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('modal-create-client')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add Client</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Assign Sales Account -->
+<% if (!isSales) { %>
+<div class="modal-overlay" id="modal-assign-sales" onclick="closeOnOverlay(event, 'modal-assign-sales')">
+    <div class="modal modal-sm">
+        <div class="modal-header">
+            <h3>Assign Sales Account</h3>
+            <button class="modal-close" onclick="closeModal('modal-assign-sales')">×</button>
+        </div>
+        <form action="/admin_account/clients/assign-sales" method="POST" id="form-assign-sales">
+            <input type="hidden" name="clientId" id="assignSalesClientId">
+            <input type="hidden" name="action" id="assignSalesAction" value="assign">
+            <div class="modal-body">
+                <p style="margin:0 0 12px;">Client: <strong id="assignSalesClientName"></strong></p>
+                <div id="assignSalesCurrent" style="display:none;margin-bottom:12px;">
+                    <p style="margin:0 0 8px;">Currently assigned to <strong id="assignSalesCurrentName"></strong>. A client can only have one sales account — remove this assignment before assigning a different one.</p>
+                </div>
+                <div class="form-group" id="assignSalesPicker">
+                    <label for="assignSalesInput">Sales Account</label>
+                    <input type="text" id="assignSalesInput" placeholder="Type a name or username…" autocomplete="off" spellcheck="false">
+                    <input type="hidden" name="salesUsername" id="assignSalesUsername">
+                    <small>Start typing, then pick a sales account from the suggestions.</small>
+                    <ul class="sales-suggest" id="assignSalesList" aria-label="Sales account suggestions"></ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('modal-assign-sales')">Cancel</button>
+                <button type="button" class="btn btn-ghost" id="assignSalesRemoveBtn" style="display:none;" onclick="submitUnassignSales()">Remove Assignment</button>
+                <button type="submit" class="btn btn-primary" id="assignSalesSubmitBtn">Assign</button>
+            </div>
+        </form>
+    </div>
+</div>
+<% } %>
+
+<!-- Modal: Edit Client -->
+<div class="modal-overlay" id="modal-edit-client" onclick="closeOnOverlay(event, 'modal-edit-client')">
+    <div class="modal modal-sm">
+        <div class="modal-header">
+            <h3>Edit Client</h3>
+            <button class="modal-close" onclick="closeModal('modal-edit-client')">×</button>
+        </div>
+        <form action="/admin_account/clients/update" method="POST">
+            <input type="hidden" name="clientId" id="editClientId">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Client Name</label>
+                    <input type="text" name="clientName" id="editClientName" required>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" name="location" id="editClientLocation">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('modal-edit-client')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Transfer Unit -->
+<% if (transferMachines) { %>
+<div class="modal-overlay" id="modal-unit-transfer" onclick="closeOnOverlay(event, 'modal-unit-transfer')">
+    <div class="modal modal-sm">
+        <div class="modal-header">
+            <h3>Transfer Unit</h3>
+            <button type="button" class="modal-close" onclick="closeModal('modal-unit-transfer')">×</button>
+        </div>
+        <form action="/admin_account/unit-transfer" method="POST" id="unitTransferForm">
+            <input type="hidden" name="machineId" id="transferMachineId">
+            <input type="hidden" name="fromClientId" id="transferFromClientId">
+            <div class="modal-body">
+                <dl class="transfer-summary">
+                    <dt>Serial No.</dt><dd class="mono" id="transferSerial"></dd>
+                    <dt>Unit / Model</dt><dd id="transferUnitModel"></dd>
+                    <dt>Current client</dt><dd id="transferFromName"></dd>
+                </dl>
+                <div class="form-group">
+                    <label for="transferToClient">Move to client</label>
+                    <select name="toClientId" id="transferToClient" required onchange="updateTransferPreview()">
+                        <option value="">Select a client…</option>
+                        <% clients.filter(c => c.status !== 'inactive').forEach(client => { %>
+                            <option value="<%= client.id %>"><%= client.name %><%= client.location ? ' — ' + client.location : '' %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <p class="transfer-preview" id="transferPreview" aria-live="polite"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('modal-unit-transfer')">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="transferSubmit" disabled>Move Unit</button>
+            </div>
+        </form>
+    </div>
+</div>
+<% } %>
+
+<!-- Modal: New / Edit Schedule -->
+<% if (schedules && schedules.available) { %>
+<div class="modal-overlay" id="modal-schedule" onclick="closeOnOverlay(event, 'modal-schedule')">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="scheduleModalTitle">New Schedule</h3>
+            <button type="button" class="modal-close" onclick="closeModal('modal-schedule')">×</button>
+        </div>
+        <form action="/admin_account/schedules/save" method="POST" id="scheduleForm" autocomplete="off">
+            <input type="hidden" name="scheduleId" id="scheduleId">
+            <input type="hidden" name="clientId" id="scheduleClientId">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="scheduleTechnician">Technician</label>
+                    <input type="hidden" name="technicianUsername" id="scheduleTechnicianUsername">
+                    <input type="text" id="scheduleTechnician" placeholder="Type a technician's name…" required
+                        autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false"
+                        aria-controls="scheduleTechnicianDropdown">
+                    <ul id="scheduleTechnicianDropdown" class="transfer-client-dropdown schedule-tech-dropdown" role="listbox"></ul>
+                    <small id="scheduleTechnicianHint"></small>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="scheduleClient">Client</label>
+                        <input type="text" id="scheduleClient" list="scheduleClientOptions" placeholder="Type to search client…" required oninput="syncScheduleClient()">
+                        <datalist id="scheduleClientOptions">
+                            <% clients.filter(c => c.status !== 'inactive').forEach(client => { %>
+                                <option value="<%= client.name %>"><%= client.location || '' %></option>
+                            <% }) %>
+                        </datalist>
+                        <small id="scheduleClientHint"></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="scheduleLocation">Location</label>
+                        <input type="text" name="location" id="scheduleLocation" maxlength="200" placeholder="Site / branch">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="scheduleDate">Date</label>
+                        <input type="date" name="date" id="scheduleDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="scheduleTime">Time (optional)</label>
+                        <input type="time" name="time" id="scheduleTime">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="scheduleDescription">Work description / instructions</label>
+                    <textarea name="description" id="scheduleDescription" rows="5" maxlength="2000" required placeholder="e.g. Preventive maintenance on 2 units; bring a drum kit."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('modal-schedule')">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="scheduleSubmit">Save Schedule</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Hidden forms: Schedule status / delete -->
+<form id="form-schedule-status" action="/admin_account/schedules/status" method="POST" style="display:none">
+    <input type="hidden" name="scheduleId" id="scheduleStatusId">
+    <input type="hidden" name="status"     id="scheduleStatusValue">
+</form>
+<form id="form-schedule-delete" action="/admin_account/schedules/delete" method="POST" style="display:none">
+    <input type="hidden" name="scheduleId" id="scheduleDeleteId">
+</form>
+<% } %>
+
+<!-- Hidden form: Disable / Enable Unit -->
+<% if (transferMachines) { %>
+<form id="form-unit-disable" action="/admin_account/unit-disable" method="POST" style="display:none">
+    <input type="hidden" name="machineId" id="unitDisableMachineId">
+    <input type="hidden" name="action"    id="unitDisableAction">
+</form>
+<% } %>
+
+<!-- Hidden form: Toggle Client Status -->
+<form id="form-toggle-cli" action="/admin_account/clients/toggle" method="POST" style="display:none">
+    <input type="hidden" name="clientId" id="toggleCliId">
+    <input type="hidden" name="status"   id="toggleCliStatus">
+</form>
+<% } %>
+
+<!-- Modal: KPI Detail -->
+<div class="modal-overlay" id="modal-kpi-detail" onclick="closeOnOverlay(event, 'modal-kpi-detail')">
+    <div class="modal modal-kpi">
+        <div class="modal-header">
+            <h3 id="kpiDetailTitle">KPI Detail</h3>
+            <button type="button" class="modal-close" onclick="closeModal('modal-kpi-detail')">×</button>
+        </div>
+        <div class="modal-body">
+            <div id="kpiDetailContent" class="kpi-detail-content">
+                <p class="monitor-empty">Loading…</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Client Detail -->
+<div class="modal-overlay" id="modal-client-detail" onclick="closeOnOverlay(event, 'modal-client-detail')">
+    <div class="modal modal-kpi">
+        <div class="modal-header">
+            <h3 id="clientDetailTitle">Client Detail</h3>
+            <button type="button" class="modal-close" onclick="closeModal('modal-client-detail')">×</button>
+        </div>
+        <div class="modal-body">
+            <div id="clientDetailContent" class="kpi-detail-content">
+                <p class="monitor-empty">Loading…</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.monitoringUnitModelOptions = <%- JSON.stringify(monitoring.unitModelOptions || {}) %>;
+    window.monitoringModelOptions = <%- JSON.stringify(monitoring.modelOptions || []) %>;
+    window.monitoringInitData = <%- JSON.stringify({
+        completedUnits: monitoring.completedUnits,
+        pendingUnits: monitoring.pendingUnits,
+        faultyUnits: monitoring.faultyUnits,
+        faultyUnitsList: monitoring.faultyUnitsList,
+        completedClients: monitoring.completedClients,
+        pendingClientsList: monitoring.pendingClientsList,
+        reportEvents: monitoring.reportEvents,
+        updateEvents: monitoring.updateEvents,
+        completionRate: monitoring.completionRate,
+        totalUnits: monitoring.totalUnits,
+        installBaseShare: monitoring.installBaseShare,
+        installBaseTotalUnits: monitoring.installBaseTotalUnits,
+        installedUnitTypes: monitoring.installedUnitTypes,
+        catalogUnitTypes: monitoring.catalogUnitTypes,
+        clientHighlights: monitoring.clientHighlights,
+        techReports: monitoring.techReports,
+        todaySerialStatus: monitoring.todaySerialStatus,
+        unitsInstalledByClient: monitoring.unitsInstalledByClient,
+        unitsInstalledInRange: monitoring.unitsInstalledInRange,
+        unitsDisabled: monitoring.unitsDisabled,
+        unitsDisabledList: monitoring.unitsDisabledList,
+        techReportLog: monitoring.techReportLog,
+        reportsInRange: monitoring.reportsInRange
+    }) %>;
+</script>
+<script>
+    // < is escaped so a note containing a closing script tag cannot end this block early.
+    window.technicianHistoryData = <%- JSON.stringify(monitoring.technicianHistory).replace(/</g, '\\u003c') %>;
+</script>
+<% if (!isSales && unitModels) { %>
+<script>
+    // Every model already in the catalog, for the live duplicate hint. The server re-checks on submit.
+    window.unitModelIndex = <%- JSON.stringify(unitModels.units.flatMap(unit => unit.models.map(model => ({ unit: unit.name, model: model.name })))).replace(/</g, '\\u003c') %>;
+</script>
+<% } %>
+<% if (!isSales) { %>
+<script>
+    // Sales accounts for the Client Management pickers. The server re-checks every assignment.
+    window.salesAccounts = <%- JSON.stringify((accounts || []).filter(a => a.role === 'sales').map(a => ({ username: a.username, fullName: a.fullName, active: a.status !== 'inactive' }))).replace(/</g, '\\u003c') %>;
+</script>
+<% } %>
+<% if (!isSales && transferMachines) { %>
+<script>
+    window.transferMachines = <%- JSON.stringify(transferMachines).replace(/</g, '\\u003c') %>;
+    window.transferClientOptions = <%- JSON.stringify(clients.map(c => ({
+        id: c.id,
+        name: c.name + (c.status === 'inactive' ? ' (inactive)' : '')
+    }))).replace(/</g, '\\u003c') %>;
+</script>
+<% } %>
+<%- include('partials/machine-history', { allowReportEdit: false }) %>
+<script src="/js/client/client-state.js?v=<%= Date.now() %>"></script>
+<script src="/js/client/client-helpers.js?v=<%= Date.now() %>"></script>
+<script src="/js/shared/machine-history.js?v=<%= Date.now() %>"></script>
+<% if (!isSales && schedules && schedules.available) { %>
+<script>
+    window.scheduleRows = <%- JSON.stringify(schedules.rows).replace(/</g, '\u003c') %>;
+    window.scheduleClients = <%- JSON.stringify(clients.filter(c => c.status !== 'inactive').map(c => ({
+        id: c.id,
+        name: c.name,
+        location: c.location || ''
+    }))).replace(/</g, '\u003c') %>;
+    window.scheduleTechnicians = <%- JSON.stringify(accounts.filter(a => a.role === 'user' && a.status !== 'inactive').map(a => ({
+        username: a.username,
+        fullName: a.fullName
+    }))).replace(/</g, '\u003c') %>;
+</script>
+<% } %>
+<script src="/js/admin/admin_account.js?v=<%= Date.now() %>"></script>
+<script src="/js/admin/serial-search.js?v=<%= Date.now() %>"></script>
+<script src="/js/admin/sidebar.js?v=<%= Date.now() %>"></script>
+<script src="/js/admin/transfer-destination.js?v=<%= Date.now() %>"></script>
+</body>
+</html>

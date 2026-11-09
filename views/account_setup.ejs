@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Up Your Account — MSI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+        --navy: #0f2d52; --navy-mid: #1a4a80; --navy-light: #2563a8;
+        --accent: #e8412a; --surface: #f0f4f9; --white: #ffffff;
+        --border: #dde4ef; --border-focus: #2563a8;
+        --text: #18293f; --text-mid: #4a6080; --text-muted: #8fa3bc;
+        --success: #0ea472; --success-bg: #eafaf4;
+        --error: #c0392b; --error-bg: #fef0ee;
+        --radius: 14px;
+        --shadow: 0 4px 24px rgba(15,45,82,.10);
+        --shadow-lg: 0 16px 56px rgba(15,45,82,.18);
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--text); min-height: 100vh; display: flex; align-items: stretch; }
+    .split-left { width: 420px; flex-shrink: 0; background: var(--navy); display: flex; flex-direction: column; justify-content: space-between; padding: 48px 44px; position: relative; overflow: hidden; }
+    .split-left::before, .split-left::after { content: ''; position: absolute; border-radius: 50%; opacity: .07; background: white; }
+    .split-left::before { width: 380px; height: 380px; bottom: -100px; right: -130px; }
+    .split-left::after  { width: 200px; height: 200px; top: 60px; right: -60px; }
+    .brand { display: flex; align-items: center; gap: 14px; z-index: 1; }
+    .brand-logo { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,.15); border: 2px solid rgba(255,255,255,.3); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; color: white; }
+    .brand-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; color: white; letter-spacing: .02em; }
+    .hero-text { z-index: 1; }
+    .hero-text h2 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 32px; color: white; line-height: 1.2; margin-bottom: 14px; }
+    .hero-text p { font-size: 14px; color: rgba(255,255,255,.55); line-height: 1.7; max-width: 300px; }
+    .invite-meta { z-index: 1; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+    .invite-meta-label { font-size: 10.5px; font-weight: 600; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .08em; }
+    .invite-meta-val { font-family: 'DM Mono', monospace; font-size: 13px; color: white; }
+    .invite-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .chip { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); color: white; font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: .04em; }
+    .chip-accent { background: rgba(232,65,42,.35); border-color: rgba(232,65,42,.5); }
+    .split-right { flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 40px; }
+    .form-card { width: 100%; max-width: 500px; background: var(--white); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow-lg); overflow: hidden; animation: cardUp .3s cubic-bezier(.34,1.56,.64,1); }
+    @keyframes cardUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .form-card-header { padding: 28px 32px 24px; border-bottom: 1px solid var(--border); }
+    .form-card-header h1 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .form-card-header p { font-size: 13px; color: var(--text-muted); }
+    .step-track-row { display: flex; align-items: flex-start; gap: 0; margin-top: 20px; }
+    .step-item { display: flex; flex-direction: column; align-items: center; gap: 5px; flex-shrink: 0; }
+    .step-item span { font-size: 10.5px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+    .step-item.active span { color: var(--navy); }
+    .step-item.done span { color: var(--success); }
+    .step-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--surface); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--text-muted); transition: all .2s; flex-shrink: 0; }
+    .step-dot.done { background: var(--success); border-color: var(--success); color: white; }
+    .step-dot.active { background: var(--navy); border-color: var(--navy); color: white; }
+    .step-connector { flex: 1; height: 2px; background: var(--border); margin-top: 14px; transition: background .3s; }
+    .step-connector.done { background: var(--success); }
+    .form-steps { padding: 28px 32px; }
+    .step-panel { display: none; flex-direction: column; gap: 18px; }
+    .step-panel.active { display: flex; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 12px; font-weight: 600; color: var(--text-mid); text-transform: uppercase; letter-spacing: .06em; }
+    .input-wrap { position: relative; display: flex; align-items: center; }
+    .input-icon { position: absolute; left: 12px; color: var(--text-muted); pointer-events: none; flex-shrink: 0; }
+    .input-wrap input, .input-wrap select { width: 100%; padding: 11px 13px 11px 38px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--white); outline: none; transition: border-color .15s, box-shadow .15s; appearance: none; }
+    .input-wrap input:focus, .input-wrap select:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(37,99,168,.10); }
+    .input-plain { width: 100%; padding: 11px 13px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--white); outline: none; transition: border-color .15s, box-shadow .15s; }
+    .input-plain:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(37,99,168,.10); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group small { font-size: 11.5px; color: var(--text-muted); }
+    .form-group small.err-hint { color: var(--error); display: none; }
+    .form-group.has-error small.err-hint { display: block; }
+    .form-group.has-error .input-plain, .form-group.has-error .input-wrap input { border-color: var(--error); }
+    .strength-bar { display: flex; gap: 4px; margin-top: 6px; }
+    .strength-seg { flex: 1; height: 4px; border-radius: 99px; background: var(--border); transition: background .25s; }
+    .strength-seg.fill-weak   { background: var(--error); }
+    .strength-seg.fill-fair   { background: #e8922a; }
+    .strength-seg.fill-good   { background: #2da84e; }
+    .strength-seg.fill-strong { background: var(--success); }
+    .strength-label { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-top: 4px; }
+    .pw-toggle { position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 0; display: flex; transition: color .15s; }
+    .pw-toggle:hover { color: var(--navy); }
+    .alert { padding: 12px 14px; border-radius: 10px; font-size: 13px; display: flex; align-items: flex-start; gap: 9px; }
+    .alert-info { background: #eef4ff; color: #1d4ed8; border: 1px solid #c7d9fb; }
+    .alert svg { flex-shrink: 0; margin-top: 1px; }
+    .form-nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 32px 28px; border-top: 1px solid var(--border); gap: 12px; }
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 11px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; border: none; transition: all .18s; text-decoration: none; }
+    .btn-primary { background: var(--navy); color: white; }
+    .btn-primary:hover { background: var(--navy-light); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(15,45,82,.25); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-ghost { background: var(--surface); color: var(--text-mid); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--border); color: var(--text); }
+    .success-screen { display: none; flex-direction: column; align-items: center; text-align: center; padding: 48px 32px 52px; gap: 16px; }
+    .success-screen.visible { display: flex; }
+    .success-icon { width: 72px; height: 72px; border-radius: 50%; background: var(--success-bg); border: 3px solid var(--success); display: flex; align-items: center; justify-content: center; color: var(--success); animation: popIn .35s cubic-bezier(.34,1.56,.64,1); }
+    @keyframes popIn { from { opacity: 0; transform: scale(.5); } to { opacity: 1; transform: scale(1); } }
+    .success-screen h2 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: var(--navy); }
+    .success-screen p { font-size: 13.5px; color: var(--text-muted); max-width: 320px; line-height: 1.7; }
+    @media (max-width: 860px) {
+        body { flex-direction: column; }
+        .split-left { width: 100%; padding: 32px 28px; min-height: auto; }
+        .split-left::before, .split-left::after { display: none; }
+        .hero-text { display: none; }
+        .split-right { padding: 28px 16px; }
+        .form-steps { padding: 22px 20px; }
+        .form-card-header { padding: 22px 20px 18px; }
+        .form-nav { padding: 16px 20px 24px; }
+        .form-row { grid-template-columns: 1fr; }
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<%
+const safeFormData = (typeof formData !== 'undefined' && formData)
+    ? formData
+    : { fullName: '', username: '' };
+%>
+
+<div class="split-left">
+    <div class="brand">
+        <div class="brand-logo">M</div>
+        <span class="brand-name">MSI Portal</span>
+    </div>
+    <div class="hero-text">
+        <h2>Welcome to<br>your new account.</h2>
+        <p>You've been invited to join MSI's internal platform. Complete the form to activate your credentials — you're just a few steps away.</p>
+    </div>
+    <div class="invite-meta">
+        <span class="invite-meta-label">Invited as</span>
+        <span class="invite-meta-val"><%= invite ? invite.email : 'Invite link not found' %></span>
+        <div class="invite-chips">
+            <span class="chip chip-accent"><%= invite ? formatRoleLabel(invite.role) : 'Invite' %></span>
+            <span class="chip"><%= invite ? invite.branch : 'Branch' %></span>
+            <span class="chip"><%= invite ? invite.department : 'Department' %></span>
+        </div>
+    </div>
+</div>
+
+<div class="split-right">
+    <div class="form-card" id="formCard">
+        <div class="form-card-header" id="cardHeader">
+            <h1>Create Your Account</h1>
+            <p><%= error ? error : 'Fill in your details below — this link expires in 24 hours.' %></p>
+            <div class="step-track-row" id="stepTrack">
+                <div class="step-item active" id="stepItem1">
+                    <div class="step-dot active" id="stepDot1">1</div>
+                    <span>Identity</span>
+                </div>
+                <div class="step-connector" id="stepConn1"></div>
+                <div class="step-item" id="stepItem2">
+                    <div class="step-dot" id="stepDot2">2</div>
+                    <span>Security</span>
+                </div>
+                <div class="step-connector" id="stepConn2"></div>
+                <div class="step-item" id="stepItem3">
+                    <div class="step-dot" id="stepDot3">3</div>
+                    <span>Review</span>
+                </div>
+            </div>
+        </div>
+
+        <form id="setupForm" method="POST" action="/account_setup">
+            <input type="hidden" name="token" value="<%= invite ? invite.token : '' %>">
+        <div class="form-steps" id="formSteps">
+            <!-- STEP 1 -->
+            <div class="step-panel active" id="panel1">
+                <div class="form-group" id="fg-fullName">
+                    <label>Full Name</label>
+                    <div class="input-wrap">
+                        <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                        <input type="text" id="fullName" name="fullName" placeholder="Juan Dela Cruz" autocomplete="name" value="<%= safeFormData.fullName ? safeFormData.fullName : '' %>">
+                    </div>
+                    <small class="err-hint">Letters and spaces only.</small>
+                </div>
+                <div class="form-group" id="fg-username">
+                    <label>Username</label>
+                    <div class="input-wrap">
+                        <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                        <input type="text" id="username" name="username" placeholder="jdelacruz" autocomplete="username" value="<%= safeFormData.username ? safeFormData.username : '' %>">
+                    </div>
+                    <small>3–20 characters, lowercase letters, numbers, underscores only.</small>
+                    <small class="err-hint">Invalid format or already taken.</small>
+                </div>
+                <div class="alert alert-info">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>Your email, role, department, and branch were pre-filled by your admin and cannot be changed here.</span>
+                </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div class="step-panel" id="panel2">
+                <div class="form-group" id="fg-password">
+                    <label>Password</label>
+                    <div class="input-wrap">
+                        <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <input type="password" id="password" name="password" placeholder="Create a strong password" autocomplete="new-password">
+                        <button type="button" class="pw-toggle" onclick="togglePw('password', 'eyeIcon1')">
+                            <svg id="eyeIcon1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                    <div class="strength-bar">
+                        <div class="strength-seg" id="seg1"></div>
+                        <div class="strength-seg" id="seg2"></div>
+                        <div class="strength-seg" id="seg3"></div>
+                        <div class="strength-seg" id="seg4"></div>
+                    </div>
+                    <div class="strength-label" id="strengthLabel">Enter a password</div>
+                    <small class="err-hint">Must be at least 8 characters with letters and numbers.</small>
+                </div>
+                <div class="form-group" id="fg-confirm">
+                    <label>Confirm Password</label>
+                    <div class="input-wrap">
+                        <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-enter your password" autocomplete="new-password">
+                        <button type="button" class="pw-toggle" onclick="togglePw('confirmPassword', 'eyeIcon2')">
+                            <svg id="eyeIcon2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                    <small class="err-hint">Passwords do not match.</small>
+                </div>
+            </div>
+
+            <!-- STEP 3 -->
+            <div class="step-panel" id="panel3">
+                <div class="alert alert-info" style="flex-direction:column;align-items:flex-start;gap:12px;">
+                    <div style="display:flex;align-items:center;gap:9px;font-weight:700;font-size:13.5px;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        Review your details before submitting
+                    </div>
+                    <div style="display:grid;grid-template-columns:110px 1fr;gap:6px 0;font-size:13px;width:100%;">
+                        <span style="color:var(--text-muted);font-weight:600;">Full Name</span>
+                        <span id="rev-name" style="font-weight:500;">—</span>
+                        <span style="color:var(--text-muted);font-weight:600;">Username</span>
+                        <span id="rev-username" style="font-family:'DM Mono',monospace;font-size:12px;">—</span>
+                        <span style="color:var(--text-muted);font-weight:600;">Email</span>
+                        <span style="font-family:'DM Mono',monospace;font-size:12px;"><%= invite ? invite.email : '—' %></span>
+                        <span style="color:var(--text-muted);font-weight:600;">Role</span>
+                        <span><%= invite ? formatRoleLabel(invite.role) : '—' %></span>
+                        <span style="color:var(--text-muted);font-weight:600;">Department</span>
+                        <span><%= invite ? invite.department : '—' %></span>
+                        <span style="color:var(--text-muted);font-weight:600;">Branch</span>
+                        <span><%= invite ? invite.branch : '—' %></span>
+                    </div>
+                </div>
+                <p style="font-size:12.5px;color:var(--text-muted);line-height:1.7;">
+                    By clicking <strong>Create Account</strong> you agree to MSI's internal data and security policy. Once submitted, your username cannot be changed without admin assistance.
+                </p>
+            </div>
+        </div>
+
+        <div class="form-nav" id="formNav">
+            <button type="button" class="btn btn-ghost" id="btnBack" onclick="prevStep()" style="visibility:hidden;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                Back
+            </button>
+            <button type="button" class="btn btn-primary" id="btnNext" onclick="nextStep()">
+                Continue
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+        </div>
+
+        <div class="success-screen" id="successScreen">
+            <div class="success-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <h2>Account Created!</h2>
+            <p>Your account has been set up successfully. You can now log in to the MSI portal with your new credentials.</p>
+            <a href="/login" class="btn btn-primary" style="margin-top:8px;">
+                Go to Login
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+        </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let currentStep = 1;
+const TOTAL = 3;
+
+function showStep(n) {
+    for (let i = 1; i <= TOTAL; i++) {
+        document.getElementById('panel' + i).classList.toggle('active', i === n);
+        const dot  = document.getElementById('stepDot' + i);
+        const item = document.getElementById('stepItem' + i);
+        if (i < n) {
+            dot.classList.add('done'); dot.classList.remove('active');
+            item.classList.add('done'); item.classList.remove('active');
+            dot.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;
+        } else if (i === n) {
+            dot.classList.add('active'); dot.classList.remove('done');
+            item.classList.add('active'); item.classList.remove('done');
+            dot.textContent = i;
+        } else {
+            dot.classList.remove('active', 'done');
+            item.classList.remove('active', 'done');
+            dot.textContent = i;
+        }
+    }
+    for (let i = 1; i < TOTAL; i++) {
+        const c = document.getElementById('stepConn' + i);
+        if (c) c.classList.toggle('done', i < n);
+    }
+    document.getElementById('btnBack').style.visibility = n > 1 ? 'visible' : 'hidden';
+    const btn = document.getElementById('btnNext');
+    if (n === TOTAL) {
+        btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Create Account`;
+    } else {
+        btn.innerHTML = `Continue <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>`;
+    }
+}
+
+function setError(id, v) { const e = document.getElementById(id); if (e) e.classList.toggle('has-error', v); }
+
+function validateStep(n) {
+    if (n === 1) {
+        const fn = document.getElementById('fullName').value.trim();
+        const un = document.getElementById('username').value.trim();
+        const fnOk = /^[A-Za-z\s]+$/.test(fn) && fn.length >= 2;
+        const unOk = /^[a-z0-9_]{3,20}$/.test(un);
+        setError('fg-fullName', !fnOk); setError('fg-username', !unOk);
+        return fnOk && unOk;
+    }
+    if (n === 2) {
+        const pw = document.getElementById('password').value;
+        const cp = document.getElementById('confirmPassword').value;
+        const pwOk = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/.test(pw);
+        const cpOk = pw === cp && cp.length > 0;
+        setError('fg-password', !pwOk); setError('fg-confirm', !cpOk);
+        return pwOk && cpOk;
+    }
+    return true;
+}
+
+function nextStep() {
+    if (!validateStep(currentStep)) return;
+    if (currentStep === TOTAL) { doSubmit(); return; }
+    currentStep++;
+    if (currentStep === TOTAL) {
+        document.getElementById('rev-name').textContent = document.getElementById('fullName').value.trim();
+        document.getElementById('rev-username').textContent = document.getElementById('username').value.trim();
+    }
+    showStep(currentStep);
+}
+
+function prevStep() { if (currentStep > 1) { currentStep--; showStep(currentStep); } }
+
+function doSubmit() {
+    const btn = document.getElementById('btnNext');
+    const backBtn = document.getElementById('btnBack');
+    btn.disabled = true;
+    backBtn.disabled = true;
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .7s linear infinite"><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg> Creating…`;
+    document.getElementById('setupForm').submit();
+}
+
+document.getElementById('password').addEventListener('input', function () {
+    const pw = this.value;
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/\d/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    const fills = ['', 'fill-weak', 'fill-fair', 'fill-good', 'fill-strong'];
+    const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+    const colors = ['', 'var(--error)', '#e8922a', '#2da84e', 'var(--success)'];
+    for (let i = 1; i <= 4; i++) {
+        document.getElementById('seg' + i).className = 'strength-seg' + (i <= score ? ' ' + fills[score] : '');
+    }
+    const lbl = document.getElementById('strengthLabel');
+    lbl.textContent = pw.length ? (labels[score] || 'Weak') : 'Enter a password';
+    lbl.style.color = colors[score] || 'var(--text-muted)';
+});
+
+function togglePw(id, iid) {
+    const inp = document.getElementById(id);
+    const ico = document.getElementById(iid);
+    const show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    ico.innerHTML = show
+        ? `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>`
+        : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+}
+
+const fnEl = document.getElementById('fullName');
+fnEl.addEventListener('input', () => {
+    const p = fnEl.selectionStart;
+    fnEl.value = fnEl.value.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+    fnEl.setSelectionRange(p, p);
+});
+
+const unEl = document.getElementById('username');
+unEl.addEventListener('input', () => {
+    const p = unEl.selectionStart;
+    unEl.value = unEl.value.toLowerCase().replace(/[^a-z0-9_]/g, '');
+    unEl.setSelectionRange(p, p);
+});
+</script>
+</body>
+</html>

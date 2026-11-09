@@ -1,0 +1,369 @@
+/*  History Modal Table  */
+.history-table-wrap {
+    max-height: 350px;
+    overflow-y: auto;
+    margin-top: 12px;
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.history-table thead th {
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    padding: 10px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid var(--border);
+}
+
+.history-table tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+}
+
+.history-table tbody tr:hover {
+    background: var(--navy-pale);
+    cursor: pointer;
+}
+
+.history-record-row:focus-visible {
+    outline: 2px solid var(--navy);
+    outline-offset: -2px;
+    background: var(--navy-pale);
+}
+
+.history-tech-cell {
+    min-width: 170px;
+}
+
+/* ΓöÇΓöÇ View Report Modal (rv = report view) ΓöÇΓöÇ */
+.rv-card {
+    background: var(--white);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 40px rgba(15, 24, 44, 0.18);
+    width: min(560px, 96vw);
+    max-height: 92dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: detailPopupIn 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Header */
+.rv-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+    gap: 10px;
+}
+
+.rv-header-left {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 0;
+}
+
+.rv-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rv-refno {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rv-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--navy);
+    flex-shrink: 0;
+}
+
+.rv-meta {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rv-close {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--white);
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.rv-close:hover {
+    background: var(--navy-pale);
+    color: var(--navy);
+    border-color: var(--navy-mid);
+}
+
+.rv-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 28px;
+    padding: 0 12px;
+    border: none;
+    border-radius: 7px;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+    color: var(--white);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px var(--navy-glow);
+    transition: box-shadow 0.15s, transform 0.05s, filter 0.15s;
+}
+
+.rv-edit-btn:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 3px 12px var(--navy-glow);
+}
+
+.rv-edit-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 4px var(--navy-glow);
+}
+
+.rv-edit-btn:focus-visible {
+    outline: 2px solid var(--navy);
+    outline-offset: 2px;
+}
+
+/* Scrollable body */
+.rv-body {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Machine identity strip */
+.rv-identity {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-bottom: 1px solid var(--border);
+}
+
+.rv-id-cell {
+    padding: 10px 14px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.rv-id-cell:last-child {
+    border-right: none;
+}
+
+.rv-id-label {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.rv-id-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    font-family: 'DM Mono', monospace;
+    word-break: break-all;
+}
+
+/* Stats row */
+.rv-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.rv-stat {
+    padding: 10px 14px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.rv-stat:last-child {
+    border-right: none;
+}
+
+.rv-stat-label {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.rv-stat-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    word-break: break-word;
+}
+
+/* Field rows */
+.rv-field {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 118px 1fr;
+    gap: 0 12px;
+    align-items: start;
+}
+
+.rv-field-last {
+    border-bottom: none;
+}
+
+.rv-field-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-top: 2px;
+    line-height: 1.4;
+}
+
+.rv-field-value {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+/* Parts list inside field */
+.rv-parts-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.rv-parts-list li {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.4;
+}
+
+.rv-parts-list li::before {
+    content: '';
+    display: none;
+}
+
+.rv-empty {
+    color: var(--muted) !important;
+    font-style: italic;
+}
+
+.rv-empty::before {
+    display: none !important;
+}
+
+/* Section divider */
+.rv-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.rv-divider span {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .rv-card {
+        border-radius: 12px;
+        max-height: 96dvh;
+    }
+
+    .rv-identity,
+    .rv-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    /* Third cell spans full width */
+    .rv-identity .rv-id-cell:nth-child(3),
+    .rv-stats .rv-stat:nth-child(3) {
+        grid-column: 1 / -1;
+        border-right: none;
+        border-top: 1px solid var(--border);
+    }
+
+    .rv-id-cell:nth-child(2),
+    .rv-stat:nth-child(2) {
+        border-right: none;
+    }
+
+    .rv-field {
+        grid-template-columns: 1fr;
+        gap: 3px;
+        padding: 10px 14px;
+    }
+
+    .rv-field-label {
+        font-size: 9.5px;
+    }
+}
+
+/* The scanned report in a saved entry's report view. */
+.rv-photo-link {
+    color: var(--navy);
+    font-weight: 600;
+    text-decoration: underline;
+    word-break: break-all;
+}

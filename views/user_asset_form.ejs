@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Printer Asset — MSI</title>
+    <link rel="stylesheet" href="/css/user/user_account.css?v=<%= Date.now() %>" />
+</head>
+<body>
+    <div class="container">
+        <% const isAdminLike = currentUser && (currentUser.role === 'admin' || currentUser.role === 'sales'); %>
+        <% const homeLink = isAdminLike ? '/admin_account' : '/user_account'; %>
+        <nav class="topnav">
+            <% if (isAdminLike) { %>
+                <a href="<%= homeLink %>" class="topnav-brand" title="Back to Dashboard" aria-label="Back to Dashboard">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="28" height="28" rx="7" fill="var(--navy)"/>
+                        <rect x="6" y="9" width="16" height="10" rx="2" fill="white" fill-opacity="0.18"/>
+                        <rect x="9" y="6" width="10" height="5" rx="1.5" fill="white" fill-opacity="0.85"/>
+                        <rect x="9" y="17" width="10" height="5" rx="1.5" fill="white" fill-opacity="0.85"/>
+                        <circle cx="18.5" cy="14" r="1.2" fill="white"/>
+                    </svg>
+                    <span class="topnav-title">MSI</span>
+                </a>
+            <% } else { %>
+                <div class="topnav-brand">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="28" height="28" rx="7" fill="var(--navy)"/>
+                        <rect x="6" y="9" width="16" height="10" rx="2" fill="white" fill-opacity="0.18"/>
+                        <rect x="9" y="6" width="10" height="5" rx="1.5" fill="white" fill-opacity="0.85"/>
+                        <rect x="9" y="17" width="10" height="5" rx="1.5" fill="white" fill-opacity="0.85"/>
+                        <circle cx="18.5" cy="14" r="1.2" fill="white"/>
+                    </svg>
+                    <span class="topnav-title">MSI</span>
+                </div>
+            <% } %>
+
+            <div class="topnav-actions">
+                <!-- Back to Dashboard icon button -->
+                <a href="<%= homeLink %>" class="nav-icon-btn" title="Back to Dashboard" aria-label="Back to Dashboard">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                </a>
+
+                <!-- User pill -->
+                <div class="nav-user-pill">
+                    <div class="nav-avatar">
+                        <%= currentUser.fullName.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase() %>
+                    </div>
+                    <div class="nav-user-info">
+                        <span class="nav-user-name"><%= currentUser.fullName %></span>
+                        <small class="nav-user-dept">
+                            <%= formatRoleLabel(currentUser.role) %>
+                            <% if (currentUser.department) { %> | <%= currentUser.department %><% } %>
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Logout icon button -->
+                <a href="/logout" class="nav-icon-btn nav-logout-btn" title="Logout" aria-label="Logout">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                </a>
+            </div>
+        </nav>
+        
+        <% if (success) { %>
+        <div class="flash flash-success" id="flashMsg"><%= success %></div>
+        <% } %>
+        <% if (error) { %>
+        <div class="flash flash-error" id="flashMsg"><%= error %></div>
+        <% } %>
+
+        <form id="assetForm" action="/user_account/new-machine" method="POST">
+
+            <!-- ── Section 1: Machine Info ── -->
+            <div class="af-card">
+                <div class="af-section-head">
+                    <div class="af-section-num">1</div>
+                    <div>
+                        <span class="af-section-title">Machine Info</span>
+                        <span class="af-section-sub">Assign client and enter unit details</span>
+                    </div>
+                </div>
+                <div class="af-body">
+                    <div class="af-row">
+                        <div class="af-field af-field-full">
+                            <label class="af-label" for="clientInput">Client</label>
+                            <div class="combo-wrap">
+                                <input type="text" id="clientInput" name="clientName" autocomplete="off" placeholder="Type client name..." required>
+                                <input type="hidden" id="clientId" name="clientId" value="<%= selectedClientId %>">
+                                <ul id="clientDropdown" class="combo-dropdown" aria-label="Client suggestions"></ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="af-row">
+                        <div class="af-field">
+                            <label class="af-label" for="unit">Unit Type</label>
+                            <select id="unit" name="unit" required>
+                                <option value="">Select unit</option>
+                                <% Object.keys(partsCatalog || {}).forEach(unitName => { %>
+                                    <option value="<%= unitName %>" <%= (savedAsset && savedAsset.unit === unitName) ? 'selected' : '' %>><%= unitName %></option>
+                                <% }) %>
+                            </select>
+                        </div>
+                        <div class="af-field">
+                            <label class="af-label" for="model">Model</label>
+                            <div class="combo-wrap model-combo-wrap">
+                                <input type="text" id="model" name="model" autocomplete="off" placeholder="Search model" value="<%= savedAsset ? savedAsset.model : '' %>" required />
+                                <ul id="modelDropdown" class="combo-dropdown" aria-label="Model suggestions"></ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="af-row">
+                        <div class="af-field">
+                            <label class="af-label" for="serialNo">Serial No.</label>
+                            <input type="text" id="serialNo" name="serialNo" placeholder="10 characters, e.g. CN24131815" minlength="10" maxlength="10" value="<%= savedAsset ? savedAsset.serialNo : '' %>" required />
+                        </div>
+                        <div class="af-field">
+                            <label class="af-label" for="dateInstalled">Date Installed</label>
+                            <input type="date" id="dateInstalled" name="dateInstalled" value="<%= savedAsset ? savedAsset.dateInstalled : '' %>" required />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Submit ── -->
+            <div class="af-actions">
+                <% if (savedAsset && success) { %>
+                <span class="af-success-note">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    Saved — <%= savedAsset.unit %> · <%= savedAsset.model %> · <%= savedAsset.serialNo %>
+                </span>
+                <% } %>
+                <button type="submit" class="btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const CLIENTS = <%- JSON.stringify(clients) %>;
+        const INITIAL_CLIENT_ID = '<%= selectedClientId %>';
+        const PARTS_CATALOG = <%- JSON.stringify(partsCatalog || {}) %>;
+    </script>
+    <script src="/js/user/user_asset_form.js?v=<%= Date.now() %>"></script>
+</body>
+</html>

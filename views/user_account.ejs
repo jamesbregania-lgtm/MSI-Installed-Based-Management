@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Account — MSI</title>
+    <link rel="stylesheet" href="/css/user/user_account.css?v=<%= Date.now() %>">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#1f4e79">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/app-icon-192.png">
+    <link rel="apple-touch-icon" href="/icons/app-icon-apple-180.png">
+</head>
+<body<%- serialSearchMode ? ' class="has-tech-tabs"' : '' %>>
+    <div class="container">
+        <nav class="topnav">
+            <% if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'sales')) { %>
+                <a class="topnav-brand topnav-brand-link" href="/admin_account" title="Back to admin">
+                    <!-- MSI printer icon -->
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="28" height="28" rx="7" fill="var(--navy)"/>
+                        <rect x="6" y="9" width="16" height="10" rx="2" fill="white" fill-opacity="0.18"/>
+                        <rect x="9" y="6" width="10" height="5" rx="1.5" fill="white" fill-opacity="0.85"/>
+                        <rect x="9" y="17" width="10" height="5" rx="1.5" fill="white" fill-opacity="0.85"/>
+                        <circle cx="18.5" cy="14" r="1.2" fill="white"/>
+                    </svg>
+                    <span class="topnav-title">MSI</span>
+                </a>
+            <% } else { %>
+                <div class="topnav-brand">
+                    <!-- MSI printer icon -->
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="28" height="28" rx="7" fill="var(--navy)"/>
+                        <rect x="6" y="9" width="16" height="10" rx="2" fill="white" fill-opacity="0.18"/>
+                        <rect x="9" y="6" width="10" height="5" rx="1.5" fill="white" fill-opacity="0.85"/>
+                        <rect x="9" y="17" width="10" height="5" rx="1.5" fill="white" fill-opacity="0.85"/>
+                        <circle cx="18.5" cy="14" r="1.2" fill="white"/>
+                    </svg>
+                    <span class="topnav-title">MSI</span>
+                </div>
+            <% } %>
+
+            <div class="topnav-actions">
+                <!-- Add Printer icon button -->
+                <% if (!currentUser || currentUser.role !== 'sales') { %>
+                    <a href="/user_account/new-machine" class="nav-icon-btn" title="Add Printer Asset" aria-label="Add Printer Asset">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="6" y="9" width="12" height="8" rx="2"/>
+                            <path d="M8 9V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/>
+                            <path d="M8 17v1a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-1"/>
+                            <line x1="12" y1="4" x2="12" y2="4"/>
+                        </svg>
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="plus-badge">
+                            <circle cx="5" cy="5" r="5" fill="#2a6499"/>
+                            <path d="M5 2.5v5M2.5 5h5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </a>
+                <% } %>
+
+                <!-- User pill -->
+                <div class="nav-user-pill">
+                    <div class="nav-avatar">
+                        <%= currentUser.fullName.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase() %>
+                    </div>
+                    <div class="nav-user-info">
+                        <span class="nav-user-name"><%= currentUser.fullName %></span>
+                        <small class="nav-user-dept">
+                            <%= formatRoleLabel(currentUser.role) %>
+                            <% if (currentUser.department) { %> | <%= currentUser.department %><% } %>
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Logout icon button -->
+                <a href="/logout" class="nav-icon-btn nav-logout-btn" title="Logout" aria-label="Logout">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                </a>
+            </div>
+        </nav>
+
+        <% if (serialSearchMode) { %>
+        <!-- Two views, one at a time: a bottom bar on phones, tabs on wider screens. -->
+        <nav class="tech-tabs" role="tablist" aria-label="Technician views">
+            <button type="button" class="tech-tab is-active" role="tab" id="techTabSchedule" data-view="schedule" aria-controls="view-schedule" aria-selected="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>My Schedule</span>
+                <span class="tech-tab-badge" id="techTabScheduleCount" hidden></span>
+            </button>
+            <button type="button" class="tech-tab" role="tab" id="techTabSearch" data-view="search" aria-controls="unit-search-section" aria-selected="false" tabindex="-1">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+                <span>Unit Search</span>
+            </button>
+        </nav>
+
+        <!-- My Schedule: work an admin assigned to this technician (Admin > Scheduling). -->
+        <section class="card sched-card" id="view-schedule" data-tech-view="schedule" role="tabpanel" aria-labelledby="techTabSchedule">
+            <div class="card-header">
+                <div>
+                    <h2 id="schedHeading">My Schedule</h2>
+                    <p>Your work assignments for today and the days ahead.</p>
+                </div>
+            </div>
+
+            <!-- Phone setup: a reminder inside the schedule, never a popup. It asks
+                 the technician to turn on notifications and install the app, and
+                 hides itself once both are done. tech_setup.js drives it. -->
+            <div class="setup-panel" id="setupModal" data-push-key="<%= pushPublicKey %>" hidden>
+                <ol class="setup-steps">
+                    <li class="setup-step" id="setupStepNotify" data-state="checking">
+                        <span class="setup-step-icon" aria-hidden="true">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        </span>
+                        <div class="setup-step-body">
+                            <div class="setup-step-text">
+                                <strong>Turn on notifications</strong>
+                                <p id="setupNotifyText" role="status">Turn on notifications so you never miss a schedule.</p>
+                            </div>
+                            <div class="setup-actions">
+                                <button type="button" class="setup-btn" id="setupNotifyBtn" hidden>Turn on notifications</button>
+                            </div>
+                        </div>
+                        <span class="setup-check" aria-label="Done">✓</span>
+                    </li>
+                    <li class="setup-step" id="setupStepInstall" data-state="checking">
+                        <span class="setup-step-icon" aria-hidden="true">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 7v7"/><path d="M9 11l3 3 3-3"/></svg>
+                        </span>
+                        <div class="setup-step-body">
+                            <div class="setup-step-text">
+                                <strong>Install the MSI app</strong>
+                                <p id="setupInstallText" role="status">Checking whether the app is installed…</p>
+                            </div>
+                            <div class="setup-actions">
+                                <button type="button" class="setup-btn" id="setupInstallBtn" hidden>Install app</button>
+                                <button type="button" class="setup-btn setup-btn-secondary" id="setupInstallConfirmBtn" hidden>I already installed it</button>
+                            </div>
+                        </div>
+                        <span class="setup-check" aria-label="Done">✓</span>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="sched-body" id="scheduleList"></div>
+        </section>
+
+        <!-- Technicians find a unit by its serial number; they don't browse clients. -->
+        <div id="unit-search-section" class="client-section" data-tech-view="search" role="tabpanel" aria-labelledby="techTabSearch" hidden>
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2>Unit Search</h2>
+                        <p>Enter a unit's serial number to open its records.</p>
+                    </div>
+                    <form id="unitSearchForm" class="unit-search-form" role="search" novalidate>
+                        <div class="search-wrap">
+                            <svg class="search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none">
+                                <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.4"/>
+                                <path d="M10 10l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                            </svg>
+                            <input
+                                type="search"
+                                id="unitSearchInput"
+                                name="serial"
+                                maxlength="100"
+                                placeholder="Serial number..."
+                                autocomplete="off"
+                                aria-label="Serial number"
+                                aria-describedby="unitSearchStatus"
+                            />
+                        </div>
+                        <button type="submit" class="btn" id="unitSearchSubmit">Search</button>
+                    </form>
+                </div>
+
+                <p class="unit-search-status" id="unitSearchStatus" role="status" aria-live="polite">
+                    Enter at least <%= minSerialSearchLength %> characters of the serial number. Search ignores upper/lower case.
+                </p>
+
+                <div id="unitSearchResults" hidden>
+                    <div class="client-list-head unit-list-head">
+                        <span class="col-num">#</span>
+                        <span class="col-name">Serial Number</span>
+                        <span class="col-client">Client</span>
+                        <span class="col-badge">Location</span>
+                        <span class="col-arrow"></span>
+                    </div>
+                    <div class="client-list" id="unitSearchRows"></div>
+                </div>
+
+                <div class="unit-search-pagination" id="unitSearchPagination" hidden>
+                    <button type="button" class="pager-btn" id="unitSearchPrevious">Previous</button>
+                    <span id="unitSearchPage"></span>
+                    <button type="button" class="pager-btn" id="unitSearchNext">Next</button>
+                </div>
+            </div>
+        </div>
+        <% } else { %>
+        <div id="client-section" class="client-section">
+        <div class="card">
+            <div class="card-header">
+                <div>
+                        <h2>Partner Client</h2>
+                        <p>Select a client to view their unit records.</p>
+            </div>
+                    <div class="search-wrap">
+                        <svg class="search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none">
+                            <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.4"/>
+                            <path d="M10 10l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                        </svg>
+                        <input
+                            type="text"
+                            id="clientSearch"
+                            placeholder="Search client..."
+                            oninput="filterClients()"
+                        />
+                    </div>
+                </div>
+
+                <div class="client-list-head">
+                    <span class="col-num">#</span>
+                    <span class="col-name">Client Name</span>
+                    <span class="col-badge">Location</span>
+                    <span class="col-arrow"></span>
+                </div>
+
+                <div class="client-list" id="client-grid"></div>
+            </div>
+        </div>
+        <% } %>
+    </div>
+
+    <% if (serialSearchMode) { %>
+    <script>
+        const MIN_SERIAL_SEARCH_LENGTH = <%- JSON.stringify(minSerialSearchLength) %>;
+    </script>
+    <script src="/js/user/unit_search.js?v=<%= Date.now() %>"></script>
+    <script>
+        // < is escaped so a description containing a closing script tag cannot end this block early.
+        window.MY_SCHEDULES = <%- JSON.stringify(schedules || []).replace(/</g, '\\u003c') %>;
+    </script>
+    <script src="/js/user/my_schedule.js?v=<%= Date.now() %>"></script>
+    <script src="/js/user/technician_tabs.js?v=<%= Date.now() %>"></script>
+    <script src="/js/user/tech_setup.js?v=<%= Date.now() %>"></script>
+    <% } else { %>
+    <script>
+        const CLIENTS = <%- JSON.stringify(clients) %>;
+    </script>
+    <script src="/js/user/user_account.js"></script>
+    <% } %>
+</body>
+</html>

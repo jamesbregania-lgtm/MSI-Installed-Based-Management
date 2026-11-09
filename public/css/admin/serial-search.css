@@ -1,0 +1,47 @@
+.main-content:has(#section-serial-search.active) { min-width: 0; }
+.serial-search-card { padding: 24px; }
+.serial-search-form { display: flex; align-items: center; gap: 16px; }
+.serial-search-field { display: grid; gap: 8px; flex: 1; }
+.serial-search-field label { font-weight: 600; }
+.serial-search-field input { width: 100%; padding: 12px; border: 1px solid var(--border-dark); border-radius: 8px; font: inherit; }
+.serial-search-field small, .serial-search-status { color: var(--text-mid); }
+.serial-search-status { padding: 20px 0; }
+.serial-search-status.is-error { color: var(--error); }
+#serialSearchRows small { display: block; margin-top: 4px; color: var(--text-mid); }
+.serial-search-pagination { display: flex; align-items: center; justify-content: flex-end; gap: 16px; padding-top: 20px; }
+.serial-search-pagination[hidden], #serialSearchResults[hidden] { display: none; }
+.serial-search-card button:disabled { opacity: .6; cursor: wait; }
+
+/* Shared report viewer uses the same colors and layout as the client page. */
+#historyPopup, #historyReportPopup {
+    --muted: var(--text-mid);
+    --navy-pale: #edf3fa;
+    position: fixed;
+    inset: 0;
+    place-items: center;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 16px;
+    background: rgba(15, 24, 44, .55);
+    z-index: 200;
+}
+#historyReportPopup { z-index: 201; }
+#historyPopup .popup-card {
+    position: relative;
+    max-height: 90dvh;
+    overflow: auto;
+    padding: 24px;
+    border-radius: 14px;
+    background: var(--white);
+    box-shadow: var(--shadow-lg);
+    max-width: 100%;
+}
+#historyReportPopup .rv-card { max-width: 100%; }
+#historyPopup .close-btn { position: absolute; top: 12px; right: 12px; border: 0; background: transparent; font-size: 24px; cursor: pointer; }
+#historyPopup .history-table-wrap { max-height: 65dvh; }
+.serial-history-caption { color: var(--text-mid); margin: 8px 0; overflow-wrap: anywhere; }
+#historyReportPopup .rv-field-value { white-space: normal; }
+@media (max-width: 650px) {
+    .serial-search-card { padding: 16px; }
+    .serial-search-form { align-items: stretch; flex-direction: column; }
+    .serial-search-pagination { justify-content: center; }
+}

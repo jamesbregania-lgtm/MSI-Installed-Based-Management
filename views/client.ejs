@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=0.8, user-scalable=no" />
+    <title>Client Profile — MSI</title>
+    <link rel="stylesheet" href="/css/client/client.css?v=<%= Date.now() %>" />
+</head>
+
+<body>
+    <div class="container">
+        <%
+            // Every role reaches this page through the "Partner Client"
+            // grid on /user_account — it's the only place in the app that
+            // links here — so Back must always return there, not skip ahead
+            // to /admin_account for admin/sales.
+            const homeLink = '/user_account';
+            // Technicians open one unit from the serial search; the page then
+            // shows only that unit, never the client's other units.
+            const unitMode = typeof unitId !== 'undefined' && unitId !== null;
+        %>
+                <nav class="topnav">
+                    <a href="<%= homeLink %>" class="topnav-brand" title="Back to Dashboard"
+                        aria-label="Back to Dashboard">
+                        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="28" height="28" rx="7" fill="var(--navy)" />
+                            <rect x="6" y="9" width="16" height="10" rx="2" fill="white" fill-opacity="0.18" />
+                            <rect x="9" y="6" width="10" height="5" rx="1.5" fill="white" fill-opacity="0.85" />
+                            <rect x="9" y="17" width="10" height="5" rx="1.5" fill="white" fill-opacity="0.85" />
+                            <circle cx="18.5" cy="14" r="1.2" fill="white" />
+                        </svg>
+                        <span class="topnav-title">MSI</span>
+                    </a>
+
+                    <div class="topnav-title topnav-page-title" id="page-title"></div>
+
+                    <div class="topnav-actions">
+                        <a href="<%= homeLink %>" class="nav-icon-btn" title="Back to Dashboard"
+                            aria-label="Back to Dashboard">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="15 18 9 12 15 6" />
+                            </svg>
+                        </a>
+
+                        <div class="nav-user-pill">
+                            <div class="nav-avatar">
+                                <%= currentUser.fullName.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase() %>
+                    </div>
+                    <div class="nav-user-info">
+                        <span class="nav-user-name"><%= currentUser.fullName %></span>
+                        <small class="nav-user-dept">
+                            <%= formatRoleLabel(currentUser.role) %>
+                            <% if (currentUser.department) { %> | <%= currentUser.department %><% } %>
+                        </small>
+                    </div>
+                </div>
+
+                <a href="/logout" class="nav-icon-btn nav-logout-btn" title="Logout" aria-label="Logout">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                </a>
+            </div>
+        </nav>
+
+        <div class="card profile-card">
+            <div class="profile-avatar" id="profile-avatar">—</div>
+            <div class="profile-info">
+                <h1 id="profile-name">—</h1>
+                <p id="profile-location">—</p>
+            </div>
+            <div class="profile-stat"<% if (unitMode) { %> style="display:none;"<% } %>>
+                <span class="stat-value" id="machine-count">—</span>
+                <span class="stat-label">Machines</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <% if (unitMode) { %>
+                    <h2>Unit Record</h2>
+                    <p>The unit you opened from the serial number search.</p>
+                    <% } else { %>
+                    <h2>Machine Records</h2>
+                    <p>All printer assets assigned to this client.</p>
+                    <% } %>
+                </div>
+                <div class="search-wrap"<% if (unitMode) { %> style="display:none;"<% } %>>
+                    <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input
+                        type="text"
+                        id="serialSearch"
+                        placeholder="Search records..."
+                        oninput="filterSerial()"
+                    />
+                </div>
+            </div>
+
+            <div id="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Unit</th>
+                            <th>Model</th>
+                            <th>Serial No.</th>
+                            <th>Date Installed</th>
+                            <th>Running Hours</th>
+                            <th>Status</th>
+                            <th>Maintenance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="machine-tbody">
+                        <tr>
+                            <td colspan="8" class="loading-row">Loading records...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-bar" id="pagination-bar">
+                <div class="pagination-controls">
+                    <button class="pagination-btn" id="prev-btn" onclick="changePage(-1)" disabled>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                        <span>Prev</span>
+                    </button>
+                    <div class="pagination-pages" id="pagination-pages"></div>
+                    <button class="pagination-btn" id="next-btn" onclick="changePage(1)" disabled>
+                        <span>Next</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    </div>
+
+    <!-- ── Machine Detail Popup ── -->
+    <div class="popup-overlay" id="detailPopup" style="display:none;">
+        <div class="detail-popup-card">
+            <div class="detail-popup-header">
+                <span class="detail-popup-title">Machine Details</span>
+                <button class="detail-popup-close" id="closePopup" aria-label="Close">×</button>
+            </div>
+            <div class="detail-popup-body" id="detailList"></div>
+            <div class="detail-popup-footer">
+                <div class="detail-action-bar">
+                    <% if (currentUser.role !== 'sales') { %>
+                    <div class="activity-menu-wrap" id="activityMenuWrap">
+                        <button type="button" id="btnActivityMenu" class="detail-action-primary"
+                            aria-haspopup="true" aria-expanded="false" aria-controls="activityMenu"
+                            title="Log a new activity for this machine">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                            <span>Log Activity</span>
+                            <svg class="activity-menu-caret" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9" />
+                            </svg>
+                        </button>
+                        <!-- Populated from MACHINE_ACTIVITY_ACTIONS in client-state.js -->
+                        <div class="activity-menu" id="activityMenu" role="menu" hidden></div>
+                    </div>
+                    <% } %>
+                    <button id="viewHistoryBtn" class="detail-action-secondary" style="display:none;"
+                        title="View History">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        <span>History</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── History List Modal ── -->
+    <div class="popup-overlay" id="historyPopup" style="display:none;">
+        <!-- Wider than the other popups: five columns, two of them dates. -->
+        <div class="popup-card" style="width: min(820px, 95vw);">
+            <button class="close-btn" id="closeHistoryPopup">×</button>
+            <h3>Machine History Records</h3>
+            <div class="history-table-wrap">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>SMR Date</th>
+                            <th>Date Encoded</th>
+                            <th>Technician / Submitted By</th>
+                            <th>Activity</th>
+                            <th>Ref No#</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyList">
+                        <tr>
+                            <td colspan="5" class="loading-row">Loading history...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── History View Report Modal ── -->
+    <div class="popup-overlay" id="historyReportPopup" style="display:none;">
+        <div class="rv-card">
+
+            <!-- Header -->
+            <div class="rv-header">
+                <div class="rv-header-left">
+                    <span class="rv-title">Service Report</span>
+                    <span class="rv-meta" id="history-report-date">-</span>
+                </div>
+                <div class="rv-header-right">
+                    <span class="rv-refno" id="history-report-refno">-</span>
+                    <% if (currentUser.role === 'admin') { %>
+                    <button class="rv-edit-btn" id="editServiceReportBtn" type="button" title="Correct an incorrect value in this report">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                        Edit
+                    </button>
+                    <% } %>
+                </div>
+                <button class="rv-close" id="closeHistoryReportPopup" aria-label="Close">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Scrollable body -->
+            <div class="rv-body">
+
+                <!-- Machine identity strip -->
+                <div class="rv-identity">
+                    <div class="rv-id-cell">
+                        <span class="rv-id-label">Unit</span>
+                        <span class="rv-id-value" id="history-report-unit">-</span>
+                    </div>
+                    <div class="rv-id-cell">
+                        <span class="rv-id-label">Model</span>
+                        <span class="rv-id-value" id="history-report-model">-</span>
+                    </div>
+                    <div class="rv-id-cell">
+                        <span class="rv-id-label">Serial</span>
+                        <span class="rv-id-value" id="history-report-serial">-</span>
+                    </div>
+                </div>
+
+                <!-- Key stats row -->
+                <div class="rv-stats">
+                    <div class="rv-stat">
+                        <span class="rv-stat-label">Running Hours</span>
+                        <span class="rv-stat-value" id="history-report-running-hours">-</span>
+                    </div>
+                    <div class="rv-stat">
+                        <span class="rv-stat-label">Status</span>
+                        <span class="rv-stat-value" id="history-report-status">-</span>
+                    </div>
+                    <div class="rv-stat">
+                        <span class="rv-stat-label">Submitted By</span>
+                        <span class="rv-stat-value" id="history-report-submitted-by">-</span>
+                    </div>
+                </div>
+
+                <!-- SMR Date -->
+                <div class="rv-field">
+                    <span class="rv-field-label">SMR Date</span>
+                    <span class="rv-field-value" id="history-report-smr-date">-</span>
+                </div>
+
+                <!-- Maintenance / Parts -->
+                <div class="rv-field">
+                    <span class="rv-field-label">Maintenance / Parts</span>
+                    <ul class="rv-parts-list" id="history-report-maintenance-parts-list">
+                        <li class="rv-empty">No updates recorded.</li>
+                    </ul>
+                </div>
+
+                <!-- Divider -->
+                <div class="rv-divider">
+                    <span>Technician Notes</span>
+                </div>
+
+                <!-- Technicians -->
+                <div class="rv-field">
+                    <span class="rv-field-label">Technicians</span>
+                    <span class="rv-field-value" id="history-report-technicians">-</span>
+                </div>
+
+                <!-- Service report image (every update since images became required) -->
+                <div class="rv-field" id="history-report-photo-row">
+                    <span class="rv-field-label">Service Report Image</span>
+                    <span class="rv-field-value" id="history-report-photo">-</span>
+                </div>
+
+                <!-- Typed notes: only on reports saved before the image replaced them -->
+                <div id="history-report-legacy-notes" hidden>
+                    <!-- Problem -->
+                    <div class="rv-field">
+                        <span class="rv-field-label">Problem / Root Cause</span>
+                        <span class="rv-field-value" id="history-report-problem">-</span>
+                    </div>
+
+                    <!-- Action -->
+                    <div class="rv-field">
+                        <span class="rv-field-label">Action Taken</span>
+                        <span class="rv-field-value" id="history-report-action">-</span>
+                    </div>
+
+                    <!-- Recommendation -->
+                    <div class="rv-field rv-field-last">
+                        <span class="rv-field-label">Recommendation</span>
+                        <span class="rv-field-value" id="history-report-recommendation">-</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <% if (currentUser.role === 'admin') { %>
+    <!-- ── Edit Service Report Modal (admin-only correction of an existing report) ── -->
+    <div class="popup-overlay" id="editReportPopup" style="display:none;">
+        <div class="popup-card" style="width: min(600px, 96vw); max-height: 90vh; overflow-y: auto;">
+            <button class="close-btn" id="closeEditReportPopup">×</button>
+            <div class="report-popup-header">
+                <div class="report-popup-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 style="margin:0 0 2px 0;">Edit Service Report</h3>
+                    <p style="margin:0;font-size:13px;color:var(--muted);">Correct an incorrect value — this does not create a new activity record.</p>
+                </div>
+            </div>
+
+            <!-- Read-only machine info -->
+            <div class="edit-readonly-section" style="margin-bottom:18px;">
+                <div class="edit-readonly-row">
+                    <span class="edit-readonly-label">Submitted By</span>
+                    <span class="edit-readonly-value" id="edit-report-submitted-by-display">—</span>
+                </div>
+            </div>
+
+            <form id="editReportForm">
+                <div class="edit-form-grid">
+
+                    <label class="edit-label" for="edit-report-unit">Unit</label>
+                    <div class="report-tech-wrap">
+                        <input class="edit-input" id="edit-report-unit" type="text" autocomplete="off"
+                            placeholder="Select a unit" required />
+                        <ul id="edit-report-unit-dropdown" class="report-tech-dropdown" aria-label="Unit suggestions"></ul>
+                    </div>
+
+                    <label class="edit-label" for="edit-report-model">Model</label>
+                    <div class="report-tech-wrap">
+                        <input class="edit-input" id="edit-report-model" type="text" autocomplete="off"
+                            placeholder="Select a model for the unit" required />
+                        <ul id="edit-report-model-dropdown" class="report-tech-dropdown" aria-label="Model suggestions"></ul>
+                    </div>
+
+                    <label class="edit-label" for="edit-report-serial">Serial No.</label>
+                    <div>
+                        <%# Same limits as Add Printer. A legacy serial of another
+                            length still loads and saves untouched: the browser
+                            only enforces these on a value the admin types. %>
+                        <input class="edit-input" id="edit-report-serial" type="text" autocomplete="off"
+                            placeholder="10 characters, e.g. CN24131815" minlength="10" maxlength="10" required />
+                    </div>
+
+                    <label class="edit-label" for="edit-report-date">Date</label>
+                    <input class="edit-input" type="date" id="edit-report-date" />
+
+                    <p class="edit-identity-note" style="grid-column: 1 / -1; margin: -4px 0 6px; font-size: 12px; color: var(--muted);">
+                        Unit, model and serial belong to the unit itself, so changing them here updates every entry in its history.
+                    </p>
+
+                    <label class="edit-label" for="edit-report-refno">Service Report Reference No.</label>
+                    <input class="edit-input" id="edit-report-refno" type="text" placeholder="e.g. SR-2026-001234" />
+
+                    <label class="edit-label" for="edit-report-running-hours">Running Hours</label>
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <input class="edit-input" type="number" id="edit-report-running-hours" min="0" step="1"
+                            placeholder="e.g. 14500" style="flex: 1; margin-bottom: 0;" />
+
+                        <label class="edit-label" for="edit-report-status" style="padding-top: 0; white-space: nowrap;">Status</label>
+                        <select class="edit-input" id="edit-report-status" style="flex: 1; margin-bottom: 0;">
+                            <option value="">Select status</option>
+                            <option value="Active">Finished – unit is working</option>
+                            <option value="Maintenance">In progress – under maintenance</option>
+                            <option value="Faulty">In progress – still faulty</option>
+                            <option value="Inactive">Out of service</option>
+                        </select>
+                    </div>
+
+                    <label class="edit-label" for="edit-report-smr-date">SMR Date</label>
+                    <input class="edit-input" type="date" id="edit-report-smr-date" />
+
+                    <label class="edit-label" for="edit-report-technicians">Technicians</label>
+                    <div class="report-tech-wrap">
+                        <input class="edit-input" id="edit-report-technicians" type="text" autocomplete="off"
+                            placeholder="Select from available technicians" />
+                        <ul id="edit-report-tech-dropdown" class="report-tech-dropdown" aria-label="Technician suggestions"></ul>
+                    </div>
+
+                </div>
+
+                <div style="margin-top:16px; display:flex; gap:10px; justify-content:flex-end;">
+                    <button type="button" id="cancelEditReportBtn" class="btn"
+                        style="background:var(--border);color:var(--text);box-shadow:none;">Cancel</button>
+                    <button type="submit" class="btn report-submit-btn">Save Correction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <% } %>
+
+    <!-- ── Edit / Update Modal (opened only via warning icon) ── -->
+    <div class="popup-overlay" id="editPopup" style="display:none;">
+        <div class="popup-card" style="width: min(620px, 96vw); max-height: 90vh; overflow-y: auto;">
+            <button class="close-btn" id="closeEditPopup">×</button>
+            <h3 id="edit-modal-title">Update Machine Record</h3>
+
+            <!-- Read-only display (not editable) -->
+            <div class="edit-readonly-section">
+                <div class="edit-readonly-row">
+                    <span class="edit-readonly-label">Unit</span>
+                    <span class="edit-readonly-value" id="edit-unit-display">-</span>
+                </div>
+                <div class="edit-readonly-row">
+                    <span class="edit-readonly-label">Model</span>
+                    <span class="edit-readonly-value" id="edit-model-display">-</span>
+                </div>
+                <div class="edit-readonly-row">
+                    <span class="edit-readonly-label">Serial No.</span>
+                    <span class="edit-readonly-value" id="edit-serial-display">-</span>
+                </div>
+                <div class="edit-readonly-row">
+                    <span class="edit-readonly-label">Activity Type</span>
+                    <span class="edit-readonly-value" id="edit-activity-display"
+                        style="font-weight: 700; color: var(--navy);">-</span>
+                </div>
+            </div>
+
+            <form id="editForm">
+                <div class="edit-form-grid">
+
+                    <label class="edit-label" for="edit-runningHours">Running Hours</label>
+                    <div class="edit-hours-status" style="display: flex; gap: 15px; align-items: center;">
+                        <input class="edit-input" type="number" id="edit-runningHours" min="0" step="1"
+                            placeholder="e.g. 14500" required style="flex: 1; margin-bottom: 0;" />
+
+                        <label class="edit-label" for="edit-status"
+                            style="padding-top: 0; white-space: nowrap;">Status</label>
+                        <select class="edit-input" id="edit-status" required style="flex: 1; margin-bottom: 0;">
+                            <option value="">Select status</option>
+                            <option value="Active">Finished – unit is working</option>
+                            <option value="Maintenance">In progress – under maintenance</option>
+                            <option value="Faulty">In progress – still faulty</option>
+                            <option value="Inactive">Out of service</option>
+                        </select>
+                    </div>
+
+                    <label class="edit-label" for="edit-smr-date">SMR Date</label>
+                    <input class="edit-input" type="date" id="edit-smr-date" required />
+
+                    <label class="edit-label" for="report-refno">Service Report Reference No.</label>
+                    <input class="edit-input" id="report-refno" type="text" placeholder="e.g. SR-2026-001234"
+                        required />
+
+                    <span class="edit-label">Service Report Image</span>
+                    <div class="photo-picker" id="edit-photo-picker">
+                        <input type="file" accept="image/jpeg,image/png,image/webp" data-photo-input hidden />
+                        <button type="button" class="photo-attach-btn" data-photo-attach>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                            </svg>
+                            Attach image
+                        </button>
+                        <span class="photo-picker-hint" data-photo-hint>JPG, PNG or WebP · max 5 MB</span>
+                        <div class="photo-chip" data-photo-chip hidden>
+                            <span class="photo-chip-name" data-photo-name></span>
+                            <button type="button" class="photo-chip-remove" data-photo-remove
+                                aria-label="Remove image">×</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ── Repair: parts used (picked from the admin Parts list only) ── -->
+                <div id="edit-parts-used-section" class="edit-form-grid" style="display:none; margin-top:10px;">
+                    <label class="edit-label" for="repair-parts-search">Parts Used <span class="edit-required" aria-hidden="true">*</span></label>
+                    <div>
+                        <div class="report-tech-wrap">
+                            <input class="edit-input" id="repair-parts-search" type="text" autocomplete="off"
+                                placeholder="Required: search parts, then pick from the list" />
+                            <ul id="repair-parts-dropdown" class="report-tech-dropdown" aria-label="Part suggestions"></ul>
+                        </div>
+                        <div id="repair-parts-chips" class="repair-parts-chips"></div>
+                    </div>
+                </div>
+
+                <!-- ── Maintenance / Parts checker ───────────────────────── -->
+                <div id="edit-parts-section" style="margin-top:18px;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                            fill="#e67e22">
+                            <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
+                        </svg>
+                        <span style="font-size:13px;font-weight:700;color:var(--navy);">Maintenance / Parts</span>
+                    </div>
+
+                    <!-- Parts table -->
+                    <div style="border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;">
+                        <table style="width:100%;border-collapse:collapse;">
+                            <thead>
+                                <tr style="background:var(--surface);">
+                                    <th
+                                        style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);">
+                                        Part</th>
+
+                                    <th
+                                        style="padding:4px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);">
+                                        <div
+                                            style="display: flex; justify-content: space-between; align-items: center;">
+                                            <span>Status</span>
+                                            <input type="text" id="partsSearch" placeholder="Search parts..."
+                                                class="edit-input"
+                                                style="width: 130px; padding: 4px 8px; font-size: 11px; font-weight: normal; text-transform: none; letter-spacing: normal; margin: 0; min-height: 24px;"
+                                                autocomplete="off" />
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="parts-tbody">
+                                <tr>
+                                    <td colspan="2"
+                                        style="text-align:center;color:var(--muted);padding:14px;font-size:13px;">No
+                                        parts to show.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Other technicians: always the last field, for every activity type -->
+                <div class="edit-form-grid" style="margin-top:18px;">
+                    <label class="edit-label" for="report-technicians">Other Technicians</label>
+                    <div class="report-tech-wrap">
+                        <input class="edit-input" id="report-technicians" type="text" autocomplete="off"
+                            placeholder="Select from available technicians" />
+                        <ul id="report-tech-dropdown" class="report-tech-dropdown" aria-label="Technician suggestions">
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="margin-top:16px; display:flex; gap:10px; justify-content:flex-end;">
+                    <button type="button" id="cancelEditBtn" class="btn"
+                        style="background:var(--border);color:var(--text);box-shadow:none;">Cancel</button>
+                    <button type="submit" class="btn" id="saveEditBtn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── Cannibalize / Pull Out Modal ── -->
+    <div class="popup-overlay" id="adHocPopup" style="display:none;">
+        <div class="popup-card" style="width: min(620px, 96vw); max-height: 90vh; overflow-y: auto;">
+            <button class="close-btn" id="closeAdHocPopup">×</button>
+            <h3 id="ad-hoc-modal-title">Update Unit</h3>
+
+            <div class="edit-readonly-section">
+                <div class="edit-readonly-row">
+                    <span class="edit-readonly-label">Unit</span>
+                    <span class="edit-readonly-value" id="ad-hoc-unit-display">—</span>
+                </div>
+                <div class="edit-readonly-row">
+                    <span class="edit-readonly-label">Model</span>
+                    <span class="edit-readonly-value" id="ad-hoc-model-display">—</span>
+                </div>
+                <div class="edit-readonly-row">
+                    <span class="edit-readonly-label">Serial No.</span>
+                    <span class="edit-readonly-value" id="ad-hoc-serial-display">—</span>
+                </div>
+            </div>
+
+            <form id="adHocForm">
+                <div id="ad-hoc-parts-section" style="margin-top:18px;">
+
+                    <div style="border:1px solid var(--border); border-radius:var(--r-sm); overflow:hidden;">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; padding: 8px 10px; background:var(--surface); border-bottom:1px solid var(--border);">
+                            <button type="button" id="ad-hoc-mode-toggle"
+                                style="display:flex;align-items:center;gap:6px; background:none; border:none; cursor:pointer; padding:0; outline:none;">
+                                <svg id="ad-hoc-mode-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                    viewBox="0 0 24 24" fill="#e67e22">
+                                    <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
+                                </svg>
+                                <span id="ad-hoc-parts-section-label"
+                                    style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;">Parts
+                                    to Cannibalize</span>
+                                <span
+                                    style="font-size:10px;color:var(--navy);font-weight:600;margin-left:4px;text-transform:none;letter-spacing:normal;">(tap
+                                    to switch)</span>
+                            </button>
+                            <input type="text" id="ad-hoc-parts-search" placeholder="Search parts..." class="edit-input"
+                                style="width: 140px; padding: 4px 8px; font-size: 11px; font-weight:normal; text-transform:none; letter-spacing:normal; margin: 0; min-height: 24px;"
+                                autocomplete="off" />
+                        </div>
+                        <div class="ad-hoc-parts-grid" id="ad-hoc-parts-list" style="padding: 10px;">
+                            <div class="ad-hoc-parts-empty">No parts listed for this model.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="edit-form-grid" style="margin-top:18px;">
+                    <label class="edit-label" for="ad-hoc-smr-date">SMR Date</label>
+                    <input class="edit-input" type="date" id="ad-hoc-smr-date" required />
+
+                    <span class="edit-label">Service Report Image</span>
+                    <div class="photo-picker" id="ad-hoc-photo-picker">
+                        <input type="file" accept="image/jpeg,image/png,image/webp" data-photo-input hidden />
+                        <button type="button" class="photo-attach-btn" data-photo-attach>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                            </svg>
+                            Attach image
+                        </button>
+                        <span class="photo-picker-hint" data-photo-hint>JPG, PNG or WebP · max 5 MB</span>
+                        <div class="photo-chip" data-photo-chip hidden>
+                            <span class="photo-chip-name" data-photo-name></span>
+                            <button type="button" class="photo-chip-remove" data-photo-remove
+                                aria-label="Remove image">×</button>
+                        </div>
+                    </div>
+
+                    <label class="edit-label" for="ad-hoc-technicians">Other Technicians</label>
+                    <div class="report-tech-wrap">
+                        <input class="edit-input" id="ad-hoc-technicians" type="text" autocomplete="off"
+                            placeholder="Select from available technicians" />
+                        <ul id="ad-hoc-tech-dropdown" class="report-tech-dropdown" aria-label="Technician suggestions">
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="margin-top:16px; display:flex; gap:10px; justify-content:flex-end;">
+                    <button type="button" id="cancelAdHocBtn" class="btn"
+                        style="background:var(--border);color:var(--text);box-shadow:none;">Cancel</button>
+                    <button type="submit" class="btn">Save Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── Confirm Modal (custom replacement for browser confirm) ── -->
+    <div class="popup-overlay" id="confirmOverlay" style="display:none;">
+        <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirmTitle"
+            aria-describedby="confirmMessage">
+            <h3 id="confirmTitle">Please Confirm</h3>
+            <p id="confirmMessage">Are you sure?</p>
+            <div class="confirm-actions">
+                <button type="button" class="btn confirm-btn-cancel" id="confirmCancelBtn">Cancel</button>
+                <button type="button" class="btn confirm-btn-ok" id="confirmOkBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CLIENT_ID = <%- JSON.stringify(clientId) %>;
+        // Set when a technician opened a single unit from the serial search.
+        const UNIT_ID = <%- JSON.stringify(unitMode ? unitId : null) %>;
+        const CLIENTS = <%- JSON.stringify(clients) %>;
+        const MACHINE_RECORDS = <%- JSON.stringify(typeof machineRecords !== 'undefined' ? machineRecords : []) %>;
+        const CURRENT_USER_FULLNAME = <%- JSON.stringify(currentUser.fullName || '') %>;
+        const TEAM_MEMBERS = <%- JSON.stringify(typeof teamMembers !== 'undefined' ? teamMembers : []) %>;
+        window.PARTS_CATALOG = <%- JSON.stringify(typeof partsCatalog !== 'undefined' ? partsCatalog : {}) %>;
+        // Unit/model pickers in the admin's Edit Service Report.
+        window.UNIT_MODEL_OPTIONS = <%- JSON.stringify(typeof unitModelOptions !== 'undefined' ? unitModelOptions : {}).replace(/</g, '\\u003c') %>;
+    </script>
+    <script src="/js/shared/running-hours.js?v=<%= Date.now() %>"></script>
+    <script src="/js/client/client-state.js?v=<%= Date.now() %>"></script>
+    <script src="/js/client/client-helpers.js?v=<%= Date.now() %>"></script>
+    <script src="/js/client/client-parts.js?v=<%= Date.now() %>"></script>
+    <script src="/js/client/client-data.js?v=<%= Date.now() %>"></script>
+    <script src="/js/client/client-detail.js?v=<%= Date.now() %>"></script>
+    <script src="/js/client/client-photo.js?v=<%= Date.now() %>"></script>
+    <script src="/js/client/client-report.js?v=<%= Date.now() %>"></script>
+    <script src="/js/client/client-confirm.js?v=<%= Date.now() %>"></script>
+    <script src="/js/client/client-edit-draft.js?v=<%= Date.now() %>"></script>
+    <script src="/js/client/client-edit-parts.js?v=<%= Date.now() %>"></script>
+    <script src="/js/client/client-adhoc.js?v=<%= Date.now() %>"></script>
+    <script src="/js/client/client-edit-submit.js?v=<%= Date.now() %>"></script>
+    <% if (currentUser.role === 'admin') { %>
+    <script src="/js/client/client-report-edit.js?v=<%= Date.now() %>"></script>
+    <% } %>
+    <script src="/js/client/client-table.js?v=<%= Date.now() %>"></script>
+</body>
+
+</html>
